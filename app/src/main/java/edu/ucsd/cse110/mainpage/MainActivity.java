@@ -67,12 +67,13 @@ public class MainActivity extends AppCompatActivity {
         });
 
         fitnessService = FitnessServiceFactory.create(fitnessServiceKey,this);
-
         fitnessService.setup();
 
         mTextMessage = (TextView) findViewById(R.id.message);
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
+        UpdateStepsAsyncTask task = new UpdateStepsAsyncTask( fitnessService );
     }
 
     @Override
