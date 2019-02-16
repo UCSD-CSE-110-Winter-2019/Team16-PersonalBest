@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
 
@@ -49,8 +50,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         SharedPreferences userSharedPref = getSharedPreferences("userdata", MODE_PRIVATE);
         userSharedPref.edit().clear().commit();
-        int height = userSharedPref.getInt("height",0);
-        if (height == 0) {
+        int height = userSharedPref.getInt("height",-1);
+        if (height == -1) {
             Intent promptHeightIntent = new Intent(this, EnterHeightActivity.class);
             startActivityForResult(promptHeightIntent, 0);
         }
@@ -74,14 +75,26 @@ public class MainActivity extends AppCompatActivity {
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         UpdateStepsAsyncTask task = new UpdateStepsAsyncTask( fitnessService );
+        task.execute();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode != RESULT_OK) {
+
+        // close if the height is not set
+        SharedPreferences userSharedPref = getSharedPreferences("userdata", MODE_PRIVATE);
+        int height = userSharedPref.getInt("height",-1);
+        if (height == -1) {
             finish();
         }
 
+        if (resultCode == RESULT_OK) {
+            if (requestCode == fitnessService.getRequestCode()) {
+                fitnessService.updateStepCount();
+            }
+        } else {
+            Log.e(TAG, "ERROR, google fit result code: " + resultCode);
+        }
     }
 
     public void setStepCount(long stepCount) {

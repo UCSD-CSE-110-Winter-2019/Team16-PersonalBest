@@ -11,6 +11,7 @@ public class UpdateStepsAsyncTask extends AsyncTask {
     public UpdateStepsAsyncTask(FitnessService service) {
         this.service = service;
     }
+
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
