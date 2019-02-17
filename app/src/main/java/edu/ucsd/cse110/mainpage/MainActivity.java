@@ -50,12 +50,12 @@ public class MainActivity extends AppCompatActivity {
                 if(walk_button.getText()== getString(R.string.start_button))
                 {
                     view.setBackgroundResource(R.drawable.end_button_bg_round);
-                    walk_button.setText(getString(R.string.end_button));
+                    view.setTag(R.drawable.end_button_bg_round);
                 }
                 else
                 {
                     view.setBackgroundResource(R.drawable.start_button_bg_round);
-                    walk_button.setText(getString(R.string.start_button));
+                    view.setTag(R.drawable.start_button_bg_round);
                 }
 
             }
