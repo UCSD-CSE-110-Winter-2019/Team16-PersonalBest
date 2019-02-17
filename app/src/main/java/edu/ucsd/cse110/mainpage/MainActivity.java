@@ -1,11 +1,13 @@
 package edu.ucsd.cse110.mainpage;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
 
@@ -47,16 +49,19 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
         SharedPreferences userSharedPref = getSharedPreferences("userdata", MODE_PRIVATE);
-        userSharedPref.edit().clear().commit();
+        //userSharedPref.edit().apply();
         int height = userSharedPref.getInt("height",0);
         if (height == 0) {
             Intent promptHeightIntent = new Intent(this, EnterHeightActivity.class);
             startActivityForResult(promptHeightIntent, 0);
         }
 
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+
+
         textSteps = findViewById(R.id.stepsView);
 
         FitnessServiceFactory.put(fitnessServiceKey, new FitnessServiceFactory.BluePrint() {
@@ -66,7 +71,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        fitnessService = FitnessServiceFactory.create(fitnessServiceKey,this);
+        //fitnessService = FitnessServiceFactory.create(fitnessServiceKey,this);
+        //fitnessService.setup(); ----> this is the code that keeps terminating the app upon page load
+        //String fitnessServiceKey = getIntent().getStringExtra(FITNESS_SERVICE_KEY);
+        fitnessService = FitnessServiceFactory.create(fitnessServiceKey, this);
         fitnessService.setup();
 
         mTextMessage = (TextView) findViewById(R.id.message);
@@ -76,12 +84,25 @@ public class MainActivity extends AppCompatActivity {
         UpdateStepsAsyncTask task = new UpdateStepsAsyncTask( fitnessService );
     }
 
-    @Override
+    /*@Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode != RESULT_OK) {
             finish();
         }
 
+    }*/
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//       If authentication was required during google fit setup, this will be called after the user authenticates
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == fitnessService.getRequestCode()) {
+                fitnessService.updateStepCount();
+            }
+        } else {
+            Log.e(TAG, "ERROR, google fit result code: " + resultCode);
+            finish();
+        }
     }
 
     public void setStepCount(long stepCount) {
