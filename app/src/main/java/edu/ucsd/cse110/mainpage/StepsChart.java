@@ -1,11 +1,13 @@
 package edu.ucsd.cse110.mainpage;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
@@ -18,12 +20,22 @@ public class StepsChart extends AppCompatActivity {
 
     private LineChart lineChart;
     private LineData lineData;
+    private int StepsForToday = 0;
     ArrayList<ILineDataSet> lineDataSets = new ArrayList<>();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_steps_chart);
+
+        Intent intent= getIntent();
+        Bundle bundle = intent.getExtras();
+
+        if(bundle!=null)
+        {
+            StepsForToday = (int)bundle.getLong("mySteps");
+
+        }
 
         lineChart = (LineChart)findViewById(R.id.linechart);
         //lineData = new LineData(getXvalues(), getLineDataValues());
@@ -39,6 +51,9 @@ public class StepsChart extends AppCompatActivity {
 
         lineDataSets.add(lineDataSet);
 
+        YAxis yAxisRight = lineChart.getAxisRight();
+        yAxisRight.setEnabled(false);
+
         lineChart.setData(new LineData(xAxis, lineDataSets));
 
         lineChart.setVisibleXRangeMaximum(1000f);
@@ -49,13 +64,16 @@ public class StepsChart extends AppCompatActivity {
 
     private ArrayList<Entry> getLineDataValues() {
         ArrayList<Entry> entryArrayList = new ArrayList<>();
+
+        //hardcoded step values for Monday to Saturday since I didn't have access to an android phone then.
+
         Entry e1 = new Entry(3460f, 0);
         Entry e2 = new Entry(3400f, 1);
         Entry e3 = new Entry(6700f, 2);
         Entry e4 = new Entry(2000f, 3);
         Entry e5 = new Entry(5600f, 4);
         Entry e6 = new Entry(1500f, 5);
-        Entry e7 = new Entry(1200f, 6);
+        Entry e7 = new Entry(StepsForToday, 6);
 
         entryArrayList.add(e1);
         entryArrayList.add(e2);

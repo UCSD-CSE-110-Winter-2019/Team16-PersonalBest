@@ -157,6 +157,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void goToChartsPage(){
         Intent intent = new Intent(this, StepsChart.class);
+        intent.putExtra("mySteps", stepCount);
         startActivity(intent);
 
     }
