@@ -9,6 +9,8 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -63,6 +65,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Button chartsPageBtn = (Button)findViewById(R.id.StepsChartBtn);
+        chartsPageBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                goToChartsPage();
+            }
+        });
 
         SharedPreferences userSharedPref = getSharedPreferences("userdata", MODE_PRIVATE);
 
@@ -131,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
         //find your average stride length
         SharedPreferences pref = getSharedPreferences("userdata", MODE_PRIVATE);
         int height = pref.getInt("height", -1);
-
+        fitnessService.updateStepCount();
         float strideLength = 0;
         if(height != -1){
             strideLength = (float)(height * 0.413);
@@ -142,6 +152,12 @@ public class MainActivity extends AppCompatActivity {
         float totalDistanceMiles = stepCount/stepsPerMile;
         System.out.println("\n\n\n\ntotalDistance is........." + totalDistanceMiles);
         return totalDistanceMiles;
+
+    }
+
+    public void goToChartsPage(){
+        Intent intent = new Intent(this, StepsChart.class);
+        startActivity(intent);
 
     }
 }
