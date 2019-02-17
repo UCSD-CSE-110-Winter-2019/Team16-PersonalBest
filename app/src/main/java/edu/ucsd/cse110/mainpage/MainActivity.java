@@ -66,7 +66,8 @@ public class MainActivity extends AppCompatActivity {
 
         SharedPreferences userSharedPref = getSharedPreferences("userdata", MODE_PRIVATE);
 
-        userSharedPref.edit().clear().commit();
+        //userSharedPref.edit().clear().commit();
+
         int height = userSharedPref.getInt("height",-1);
         if (height == -1) {
             Intent promptHeightIntent = new Intent(this, EnterHeightActivity.class);
@@ -134,12 +135,12 @@ public class MainActivity extends AppCompatActivity {
         float strideLength = 0;
         if(height != -1){
             strideLength = (float)(height * 0.413);
-            System.out.print("strideLength is........." + strideLength);
+            System.out.println("\n\n\n\nstrideLength is........." + strideLength);
         }
         float feetPerStride = strideLength/12;
         float stepsPerMile = 5280/feetPerStride;
         float totalDistanceMiles = stepCount/stepsPerMile;
-        System.out.println(totalDistanceMiles);
+        System.out.println("\n\n\n\ntotalDistance is........." + totalDistanceMiles);
         return totalDistanceMiles;
 
     }
