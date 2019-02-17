@@ -101,6 +101,64 @@ public class WalkButtonTests {
         button3.check(matches(isClickable()));
     }
 
+    @Test
+    public void buttonTextTest() {
+        ViewInteraction button = onView(
+                allOf(withId(R.id.walk_button),
+                        childAtPosition(
+                                allOf(withId(R.id.container),
+                                        childAtPosition(
+                                                withId(android.R.id.content),
+                                                0)),
+                                2),
+                        isDisplayed()));
+        button.check(matches(withText("Start\nWalk")));
+
+        ViewInteraction appCompatButton = onView(
+                allOf(withId(R.id.walk_button), withText("Start\nWalk"),
+                        childAtPosition(
+                                allOf(withId(R.id.container),
+                                        childAtPosition(
+                                                withId(android.R.id.content),
+                                                0)),
+                                2),
+                        isDisplayed()));
+        appCompatButton.perform(click());
+
+        ViewInteraction button2 = onView(
+                allOf(withId(R.id.walk_button),
+                        childAtPosition(
+                                allOf(withId(R.id.container),
+                                        childAtPosition(
+                                                withId(android.R.id.content),
+                                                0)),
+                                2),
+                        isDisplayed()));
+        button2.check(matches(withText("End\nWalk")));
+
+        ViewInteraction appCompatButton2 = onView(
+                allOf(withId(R.id.walk_button), withText("End\nWalk"),
+                        childAtPosition(
+                                allOf(withId(R.id.container),
+                                        childAtPosition(
+                                                withId(android.R.id.content),
+                                                0)),
+                                2),
+                        isDisplayed()));
+        appCompatButton2.perform(click());
+
+        ViewInteraction button3 = onView(
+                allOf(withId(R.id.walk_button),
+                        childAtPosition(
+                                allOf(withId(R.id.container),
+                                        childAtPosition(
+                                                withId(android.R.id.content),
+                                                0)),
+                                2),
+                        isDisplayed()));
+        button3.check(matches(withText("Start\nWalk")));
+    }
+
     private static Matcher<View> childAtPosition(
             final Matcher<View> parentMatcher, final int position) {
 
