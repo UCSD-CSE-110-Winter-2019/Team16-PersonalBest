@@ -47,15 +47,15 @@ public class MainActivity extends AppCompatActivity {
         walk_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(walk_button.getText()=="Start\nWalk")
+                if(walk_button.getText()== getString(R.string.start_button))
                 {
                     view.setBackgroundResource(R.drawable.end_button_bg_round);
-                    walk_button.setText("End\nWalk");
+                    walk_button.setText(getString(R.string.end_button));
                 }
                 else
                 {
                     view.setBackgroundResource(R.drawable.start_button_bg_round);
-                    walk_button.setText("Start\nWalk");
+                    walk_button.setText(getString(R.string.start_button));
                 }
 
             }
