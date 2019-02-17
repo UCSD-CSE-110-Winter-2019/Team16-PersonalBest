@@ -53,9 +53,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         SharedPreferences userSharedPref = getSharedPreferences("userdata", MODE_PRIVATE);
-        //userSharedPref.edit().apply();
-        int height = userSharedPref.getInt("height",0);
-        if (height == 0) {
+
+        userSharedPref.edit().clear().commit();
+        int height = userSharedPref.getInt("height",-1);
+        if (height == -1) {
             Intent promptHeightIntent = new Intent(this, EnterHeightActivity.class);
             startActivityForResult(promptHeightIntent, 0);
         }
@@ -82,26 +83,26 @@ public class MainActivity extends AppCompatActivity {
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         UpdateStepsAsyncTask task = new UpdateStepsAsyncTask( fitnessService );
+        task.execute();
     }
-
-    /*@Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode != RESULT_OK) {
-            finish();
-        }
-
-    }*/
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//       If authentication was required during google fit setup, this will be called after the user authenticates
-        if (resultCode == Activity.RESULT_OK) {
+
+        // close if the height is not set
+        SharedPreferences userSharedPref = getSharedPreferences("userdata", MODE_PRIVATE);
+        int height = userSharedPref.getInt("height",-1);
+        if (height == -1) {
+            finish();
+        }
+
+        if (resultCode == RESULT_OK) {
+
             if (requestCode == fitnessService.getRequestCode()) {
                 fitnessService.updateStepCount();
             }
         } else {
             Log.e(TAG, "ERROR, google fit result code: " + resultCode);
-            finish();
         }
     }
 
