@@ -11,6 +11,17 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.fitness.Fitness;
+import com.google.android.gms.fitness.data.DataSet;
+import com.google.android.gms.fitness.data.DataType;
+import com.google.android.gms.fitness.data.Field;
+import com.google.android.gms.fitness.result.DailyTotalResult;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+
 import edu.ucsd.cse110.mainpage.fitness.FitnessService;
 import edu.ucsd.cse110.mainpage.fitness.FitnessServiceFactory;
 import edu.ucsd.cse110.mainpage.fitness.GoogleFitAdapter;
@@ -19,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView mTextMessage;
     private TextView textSteps;
+    private long stepCount;
 
     public static final String FITNESS_SERVICE_KEY = "FITNESS_SERVICE_KEY";
     private String fitnessServiceKey = "GOOGLE_FIT";
@@ -84,6 +96,8 @@ public class MainActivity extends AppCompatActivity {
 
         UpdateStepsAsyncTask task = new UpdateStepsAsyncTask( fitnessService );
         task.execute();
+
+        stepsToDistance(stepCount);
     }
 
     @Override
@@ -108,5 +122,25 @@ public class MainActivity extends AppCompatActivity {
 
     public void setStepCount(long stepCount) {
         textSteps.setText(String.valueOf(stepCount));
+        this.stepCount = stepCount;
+    }
+
+
+    public float stepsToDistance(long stepCount){
+        //find your average stride length
+        SharedPreferences pref = getSharedPreferences("userdata", MODE_PRIVATE);
+        int height = pref.getInt("height", -1);
+
+        float strideLength = 0;
+        if(height != -1){
+            strideLength = (float)(height * 0.413);
+            System.out.print("strideLength is........." + strideLength);
+        }
+        float feetPerStride = strideLength/12;
+        float stepsPerMile = 5280/feetPerStride;
+        float totalDistanceMiles = stepCount/stepsPerMile;
+        System.out.println(totalDistanceMiles);
+        return totalDistanceMiles;
+
     }
 }
