@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
 
         userSharedPref = getSharedPreferences("userdata", MODE_PRIVATE);
 
-        userSharedPref.edit().apply();
+        userSharedPref.edit().clear().commit();
 
         int height = userSharedPref.getInt("height",-1);
         stepsCount = userSharedPref.getLong("steps", 0);
