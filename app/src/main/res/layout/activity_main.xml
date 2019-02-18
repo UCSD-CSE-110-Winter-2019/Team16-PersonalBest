@@ -10,32 +10,38 @@
 
     <TextView
         android:id="@+id/message"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/primary_background"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="184dp"
-        android:layout_marginTop="208dp"
+        android:layout_marginVertical="@dimen/activity_vertical_margin"
+        android:padding="@dimen/content_padding"
         android:text="@string/title_home"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:textColor="@color/lightText"
+        android:textSize="@dimen/heading2_size"
+        />
 
     <TextView
         android:id="@+id/stepsView"
+        android:background="@drawable/primary_background"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="100dp"
+        android:layout_gravity="center_horizontal"
+        android:padding="@dimen/content_padding"
         android:text="Steps"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.49"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
+        android:textColor="@color/lightText"
+        android:textSize="@dimen/heading2_size"/>
 
     <Button
         android:id="@+id/walk_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="100dp"
         android:layout_gravity="center_horizontal"
         android:background="@drawable/start_button_bg_round"
-        android:text="@string/start_button" />
+        android:text="@string/start_button"
+        android:textColor="@color/lightText"/>
 
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/navigation"

@@ -20,7 +20,7 @@ import edu.ucsd.cse110.mainpage.fitness.GoogleFitAdapter;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView mTextMessage;
+    private TextView homeMessage;
     private TextView textSteps;
 
     public static final String FITNESS_SERVICE_KEY = "FITNESS_SERVICE_KEY";
@@ -37,13 +37,13 @@ public class MainActivity extends AppCompatActivity {
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_home:
-                    mTextMessage.setText(R.string.title_home);
+                    homeMessage.setText(R.string.title_home);
                     return true;
                 case R.id.navigation_dashboard:
-                    mTextMessage.setText(R.string.title_dashboard);
+                    homeMessage.setText(R.string.title_dashboard);
                     return true;
                 case R.id.navigation_notifications:
-                    mTextMessage.setText(R.string.title_notifications);
+                    homeMessage.setText(R.string.title_notifications);
                     return true;
             }
             return false;
@@ -64,8 +64,6 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(promptHeightIntent, 0);
         }
 
-
-
         textSteps = findViewById(R.id.stepsView);
 
         FitnessServiceFactory.put(fitnessServiceKey, new FitnessServiceFactory.BluePrint() {
@@ -81,22 +79,29 @@ public class MainActivity extends AppCompatActivity {
         fitnessService = FitnessServiceFactory.create(fitnessServiceKey, this);
         fitnessService.setup();
 
-        mTextMessage = (TextView) findViewById(R.id.message);
+        homeMessage = (TextView) findViewById(R.id.message);
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         final Button walk_button = (Button) findViewById(R.id.walk_button);
+        walk_button.setTextColor(Color.WHITE);
         walk_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if(walk_button.getText()== getString(R.string.start_button))
                 {
+                    homeMessage.setBackgroundResource(R.drawable.accent_background);
+                    textSteps.setBackgroundResource(R.drawable.accent_background);
                     view.setBackgroundResource(R.drawable.end_button_bg_round);
+                    homeMessage.setText(getString(R.string.title_walk));
                     walk_button.setText(getString(R.string.end_button));
                 }
                 else
                 {
+                    homeMessage.setBackgroundResource(R.drawable.primary_background);
+                    textSteps.setBackgroundResource(R.drawable.primary_background);
                     view.setBackgroundResource(R.drawable.start_button_bg_round);
+                    homeMessage.setText(getString(R.string.title_home));
                     walk_button.setText(getString(R.string.start_button));
                 }
 
