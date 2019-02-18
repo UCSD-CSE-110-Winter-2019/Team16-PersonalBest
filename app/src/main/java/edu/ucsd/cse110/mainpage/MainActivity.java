@@ -107,6 +107,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         userSharedPref = getSharedPreferences("userdata", MODE_PRIVATE);
+        currGoalNum = userSharedPref.getLong("stepGoal", 0);
+        currentGoal.setText(""+currGoalNum);
 
         userSharedPref.edit().clear().commit();
 
@@ -248,6 +250,7 @@ public class MainActivity extends AppCompatActivity {
     public void goToChartsPage(){
         Intent intent = new Intent(this, StepsChart.class);
         intent.putExtra("mySteps", stepsCount);
+        intent.putExtra("goal", currGoalNum);
         startActivity(intent);
     }
 
