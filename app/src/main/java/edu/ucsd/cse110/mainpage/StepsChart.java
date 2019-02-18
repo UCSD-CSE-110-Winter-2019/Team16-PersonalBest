@@ -21,6 +21,7 @@ public class StepsChart extends AppCompatActivity {
     private LineChart lineChart;
     private LineData lineData;
     private int StepsForToday = 0;
+    private long goalSteps = 0;
     ArrayList<ILineDataSet> lineDataSets = new ArrayList<>();
 
     @Override
@@ -34,6 +35,8 @@ public class StepsChart extends AppCompatActivity {
         if(bundle!=null)
         {
             StepsForToday = (int)bundle.getLong("mySteps");
+            goalSteps = bundle.getLong("goal");
+
 
         }
 
@@ -49,7 +52,13 @@ public class StepsChart extends AppCompatActivity {
         lineDataSet.setDrawCircles(true);
         lineDataSet.setColor(Color.BLUE);
 
+        LineDataSet goalLine = new LineDataSet(getGoalDataValues(), "goal");
+        goalLine.setDrawCircles(false);
+        goalLine.setDrawValues(false);
+        goalLine.setColor(Color.RED);
+
         lineDataSets.add(lineDataSet);
+        lineDataSets.add(goalLine);
 
         YAxis yAxisRight = lineChart.getAxisRight();
         yAxisRight.setEnabled(false);
@@ -59,6 +68,7 @@ public class StepsChart extends AppCompatActivity {
         lineChart.setVisibleXRangeMaximum(1000f);
         lineChart.setTouchEnabled(true);
         lineChart.setDragEnabled(true);
+
 
     }
 
@@ -75,6 +85,9 @@ public class StepsChart extends AppCompatActivity {
         Entry e6 = new Entry(1500f, 5);
         Entry e7 = new Entry(StepsForToday, 6);
 
+
+
+
         entryArrayList.add(e1);
         entryArrayList.add(e2);
         entryArrayList.add(e3);
@@ -84,6 +97,32 @@ public class StepsChart extends AppCompatActivity {
         entryArrayList.add(e7);
 
         return entryArrayList;
+    }
+
+    private ArrayList<Entry> getGoalDataValues() {
+        ArrayList<Entry> goalArrayList = new ArrayList<>();
+
+        Entry goal1 = new Entry(goalSteps, 0);
+        Entry goal2 = new Entry(goalSteps, 1);
+        Entry goal3 = new Entry(goalSteps, 2);
+        Entry goal4 = new Entry(goalSteps, 3);
+        Entry goal5 = new Entry(goalSteps, 4);
+        Entry goal6 = new Entry(goalSteps, 5);
+        Entry goal7 = new Entry(goalSteps, 6);
+
+
+
+
+
+        goalArrayList.add(goal1);
+        goalArrayList.add(goal2);
+        goalArrayList.add(goal3);
+        goalArrayList.add(goal4);
+        goalArrayList.add(goal5);
+        goalArrayList.add(goal6);
+        goalArrayList.add(goal7);
+
+        return goalArrayList;
     }
 
     private ArrayList<String> getXvalues() {
