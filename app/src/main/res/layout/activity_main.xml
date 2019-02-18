@@ -116,6 +116,30 @@
             />
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/goalBtn"
+            android:text="Set Goal"/>
+
+        <EditText
+            android:id="@+id/currGoal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType = "number"
+            android:text="0"
+            />
+
+
+
+    </LinearLayout>
+
+
 
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/navigation"

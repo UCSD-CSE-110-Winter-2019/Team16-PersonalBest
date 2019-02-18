@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,6 +41,8 @@ public class MainActivity extends AppCompatActivity {
     private long endTime;
     private long startSteps;
     SharedPreferences userSharedPref;
+    private long currGoalNum = 0;
+    public EditText currentGoal;
 
     public static final String FITNESS_SERVICE_KEY = "FITNESS_SERVICE_KEY";
     private String fitnessServiceKey = "GOOGLE_FIT";
@@ -81,10 +84,25 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        currentGoal = (EditText)findViewById(R.id.currGoal);
+        //currentGoal.setHint("Set Goal");
+
+            System.out.println("goal is......." + currGoalNum );
+
+
+
+
         Button personalBestBtn = (Button)findViewById(R.id.personalbestBtn);
         personalBestBtn.setOnClickListener(new View.OnClickListener(){
             public void onClick (View v){
                 updatePersonalBest();
+            }
+        });
+
+        Button setGoalBtn = (Button)findViewById(R.id.goalBtn);
+        setGoalBtn.setOnClickListener(new View.OnClickListener(){
+            public void onClick (View v){
+                setGoal();
             }
         });
 
@@ -165,6 +183,7 @@ public class MainActivity extends AppCompatActivity {
         walkingSpeed(stepsToDistance(stepsCount),500);
     }
 
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
@@ -189,8 +208,8 @@ public class MainActivity extends AppCompatActivity {
     public void setStepCount(long stepCount) {
         textSteps.setText(String.valueOf(stepCount) + " Steps");
         this.stepsCount = stepCount;
-        System.out.println("\n\n\n\n my steps1 taken are ........." + stepCount);
-        System.out.println("\n\n\n\n my stepsCount taken are ........." + stepsCount);
+        //System.out.println("\n\n\n\n my steps1 taken are ........." + stepCount);
+        //System.out.println("\n\n\n\n my stepsCount taken are ........." + stepsCount);
         SharedPreferences.Editor editor = userSharedPref.edit();
         editor.putLong("steps", stepCount);
         editor.apply();
@@ -207,14 +226,14 @@ public class MainActivity extends AppCompatActivity {
         float strideLength = 0;
         if (height != -1) {
             strideLength = (float) (height * 0.413);
-            System.out.println("\n\n\n\nstrideLength is........." + strideLength);
+            //System.out.println("\n\n\n\nstrideLength is........." + strideLength);
         }
 
         float feetPerStride = strideLength/12;
         float stepsPerMile = 5280/feetPerStride;
         float totalDistanceMiles = steps/stepsPerMile;
-        System.out.println("\n\n\n\n my steps taken are ........." + steps);
-        System.out.println("\n\n\n\ntotalDistance is........." + totalDistanceMiles);
+        //System.out.println("\n\n\n\n my steps taken are ........." + steps);
+        //System.out.println("\n\n\n\ntotalDistance is........." + totalDistanceMiles);
         setDistanceTextView(totalDistanceMiles);
         return totalDistanceMiles;
 
@@ -244,7 +263,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void updatePersonalBest(){
-        System.out.println("Personal Best is " + userSharedPref.getLong("userdata", 0));
+        //System.out.println("Personal Best is " + userSharedPref.getLong("userdata", 0));
         if (userSharedPref.getLong("personalBest", 0) < stepsCount) {
             SharedPreferences.Editor editor = userSharedPref.edit();
             editor.putLong("personalBest", stepsCount);
@@ -253,6 +272,19 @@ public class MainActivity extends AppCompatActivity {
         TextView personalBest = (TextView)findViewById(R.id.personalBest);
         long bestSteps= userSharedPref.getLong("personalBest",0);
         personalBest.setText("Best: " + String.valueOf(bestSteps) + " Steps");
+    }
+
+    public void setGoal(){
+        SharedPreferences.Editor editor = userSharedPref.edit();
+        currGoalNum = Integer.parseInt(currentGoal.getText().toString());
+        editor.putLong("stepGoal", currGoalNum);
+        editor.apply();
+        currentGoal.setText("" + currGoalNum);
+        Toast toast = Toast.makeText(getApplicationContext(),
+                "Your new daily steps goal is " + currGoalNum,
+                Toast.LENGTH_SHORT);
+
+        toast.show();
     }
 }
 
