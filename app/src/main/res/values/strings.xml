@@ -1,8 +1,13 @@
 <resources>
     <string name="app_name">MainPage</string>
-    <string name="title_home">Home</string>
+    <string name="title_home">Fitness Tracking</string>
+    <string name="title_walk">Recording Walk...</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
     <string name="start_button">Start\nWalk</string>
     <string name="end_button">End\nWalk</string>
+    <string name="title_activity_prompt_height">PromptHeightActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="confirmHeight">Confirm</string>
 </resources>

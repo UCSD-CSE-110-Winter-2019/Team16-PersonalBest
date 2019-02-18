@@ -8,31 +8,51 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
+    <TextView
+        android:id="@+id/message"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/primary_background"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="@dimen/activity_vertical_margin"
+        android:padding="@dimen/content_padding"
+        android:text="@string/title_home"
+        android:textColor="@color/lightText"
+        android:textSize="@dimen/heading2_size"
+        />
+
+    <TextView
+        android:id="@+id/stepsView"
+        android:background="@drawable/primary_background"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="100dp"
+        android:layout_gravity="center_horizontal"
+        android:padding="@dimen/content_padding"
+        android:text="Steps"
+        android:textColor="@color/lightText"
+        android:textSize="@dimen/heading2_size"/>
+
+    <Button
+        android:id="@+id/walk_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="100dp"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/start_button_bg_round"
+        android:text="@string/start_button"
+        android:textColor="@color/lightText"/>
+
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/navigation"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="0dp"
-        android:layout_marginEnd="0dp"
+        android:layout_marginBottom="16dp"
         android:background="?android:attr/windowBackground"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:menu="@menu/navigation" />
-
-    <TextView
-        android:id="@+id/message"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/title_home"
-        android:layout_gravity="center_horizontal" />
-
-    <Button
-        android:id="@+id/walk_button"
-        android:background="@drawable/start_button_bg_round"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/start_button"
-        android:layout_gravity="center_horizontal" />
 
 </LinearLayout>
