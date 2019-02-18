@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -7,7 +11,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".MainActivity">
-
     <TextView
         android:id="@+id/message"
         android:layout_gravity="center_horizontal"
@@ -26,22 +29,93 @@
         android:background="@drawable/primary_background"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="@dimen/spacing_size"
         android:layout_gravity="center_horizontal"
         android:padding="@dimen/content_padding"
-        android:text="Steps"
+        android:text="@string/steps"
         android:textColor="@color/lightText"
         android:textSize="@dimen/heading2_size"/>
 
-    <Button
-        android:id="@+id/walk_button"
+    <TextView
+        android:id="@+id/distanceTView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="100dp"
+        android:padding="@dimen/content_padding"
         android:layout_gravity="center_horizontal"
-        android:background="@drawable/start_button_bg_round"
-        android:text="@string/start_button"
-        android:textColor="@color/lightText"/>
+        android:layout_marginTop="@dimen/spacing_size"
+        android:background="@drawable/primary_background"
+        android:text="@string/distance"
+        android:textColor="@color/lightText"
+        android:textDirection="rtl"
+        android:textSize="@dimen/heading2_size"/>
+
+    <TextView
+        android:id="@+id/walkingSpeed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/content_padding"
+        android:layout_marginTop="@dimen/spacing_size"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/primary_background"
+        android:text="@string/speed"
+        android:textColor="@color/lightText"
+        android:textSize="@dimen/heading2_size"
+        />
+
+    <TextView
+        android:id="@+id/personalBest"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/content_padding"
+        android:layout_marginTop="@dimen/spacing_size"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center"
+        android:background="@drawable/primary_background"
+        android:text="@string/personal_best"
+        android:textColor="@color/lightText"
+        android:textSize="@dimen/heading2_size"/>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/spacing_size"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/StepsChartBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="@dimen/content_padding"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/start_button_bg_round"
+            android:text="@string/chart_button"
+            android:textColor="@color/lightText"/>
+
+        <Button
+            android:id="@+id/walk_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="100dp"
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="12dp"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/start_button_bg_round"
+            android:text="@string/start_button"
+            android:textColor="@color/lightText"/>
+
+        <Button
+            android:id="@+id/personalbestBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="@dimen/content_padding"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/start_button_bg_round"
+            android:onClick="updatePersonalBest"
+            android:text="@string/pr_button"
+            android:textColor="@color/lightText"
+            />
+    </LinearLayout>
 
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/navigation"
@@ -56,3 +130,4 @@
         app:menu="@menu/navigation" />
 
 </LinearLayout>
+</ScrollView>

@@ -21,6 +21,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".EnterHeightActivity"></activity>
+        <activity android:name=".StepsChart"></activity>
     </application>
 
 </manifest>
