@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
     private FitnessService fitnessService;
+    private UpdateStepsAsyncTask task;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -157,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        UpdateStepsAsyncTask task = new UpdateStepsAsyncTask(fitnessService);
+        task = new UpdateStepsAsyncTask(fitnessService);
         task.execute();
         fitnessService.updateStepCount();
 
@@ -184,6 +185,10 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Log.e(TAG, "ERROR, google fit result code: " + resultCode);
         }
+    }
+
+    public void cancelStepAsyncTask() {
+        task.cancel(true);
     }
 
     public void setStepCount(long stepCount) {

@@ -26,7 +26,9 @@ public class UpdateStepsAsyncTask extends AsyncTask {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            //return null;
+            if (isCancelled()) {
+                return null;
+            }
         }
     }
 
