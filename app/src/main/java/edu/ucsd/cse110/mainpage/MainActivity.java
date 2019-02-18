@@ -149,8 +149,8 @@ public class MainActivity extends AppCompatActivity {
                     fitnessService.updateStepCount();
                     walkStepsCount = stepper.getSteps(stepsCount);
                     walkDistance = DistanceCalculator.stepsToDistance(walkStepsCount, height);
-                    walkSpeed = SpeedCalculator.walkingSpeed(walkDistance, walkTime);
                     walkTime = timer.getWalkTime();
+                    walkSpeed = SpeedCalculator.walkingSpeed(walkDistance, walkTime);
 
                     // Provide the user information about the walk
                     toaster("You walked for " + walkStepsCount + " steps over " + walkTime / 1000
