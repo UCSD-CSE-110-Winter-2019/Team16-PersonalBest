@@ -32,7 +32,8 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView mTextMessage;
     private TextView textSteps;
-    private long stepCount;
+    private long stepsCount;
+    SharedPreferences userSharedPref;
 
     public static final String FITNESS_SERVICE_KEY = "FITNESS_SERVICE_KEY";
     private String fitnessServiceKey = "GOOGLE_FIT";
@@ -74,11 +75,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        SharedPreferences userSharedPref = getSharedPreferences("userdata", MODE_PRIVATE);
+        userSharedPref = getSharedPreferences("userdata", MODE_PRIVATE);
 
         //userSharedPref.edit().clear().commit();
 
         int height = userSharedPref.getInt("height",-1);
+        stepsCount = userSharedPref.getLong("steps", 0);
         if (height == -1) {
             Intent promptHeightIntent = new Intent(this, EnterHeightActivity.class);
             startActivityForResult(promptHeightIntent, 0);
@@ -108,14 +110,13 @@ public class MainActivity extends AppCompatActivity {
         UpdateStepsAsyncTask task = new UpdateStepsAsyncTask( fitnessService );
         task.execute();
 
-        stepsToDistance(stepCount);
+        stepsToDistance();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         // close if the height is not set
-        SharedPreferences userSharedPref = getSharedPreferences("userdata", MODE_PRIVATE);
         int height = userSharedPref.getInt("height",-1);
         if (height == -1) {
             finish();
@@ -133,14 +134,20 @@ public class MainActivity extends AppCompatActivity {
 
     public void setStepCount(long stepCount) {
         textSteps.setText(String.valueOf(stepCount));
-        this.stepCount = stepCount;
+        this.stepsCount = stepCount;
+        System.out.println("\n\n\n\n my steps1 taken are ........." + stepCount);
+        System.out.println("\n\n\n\n my stepsCount taken are ........." + stepsCount);
+        SharedPreferences.Editor editor = userSharedPref.edit();
+        editor.putLong("steps", stepCount);
+        editor.apply();
+        //stepsToDistance(stepCount);
     }
 
 
-    public float stepsToDistance(long stepCount){
+    public float stepsToDistance(){
         //find your average stride length
-        SharedPreferences pref = getSharedPreferences("userdata", MODE_PRIVATE);
-        int height = pref.getInt("height", -1);
+        int height = userSharedPref.getInt("height", -1);
+        stepsCount = userSharedPref.getLong("steps", 0);
         fitnessService.updateStepCount();
         float strideLength = 0;
         if(height != -1){
@@ -149,15 +156,22 @@ public class MainActivity extends AppCompatActivity {
         }
         float feetPerStride = strideLength/12;
         float stepsPerMile = 5280/feetPerStride;
-        float totalDistanceMiles = stepCount/stepsPerMile;
+        float totalDistanceMiles = stepsCount/stepsPerMile;
+        System.out.println("\n\n\n\n my steps taken are ........." + stepsCount);
         System.out.println("\n\n\n\ntotalDistance is........." + totalDistanceMiles);
+        setDistanceTextView(totalDistanceMiles);
         return totalDistanceMiles;
 
     }
 
+    public void setDistanceTextView(float totalDistance){
+        TextView distance = (TextView)findViewById(R.id.distanceTView);
+        distance.setText(""+totalDistance);
+    }
+
     public void goToChartsPage(){
         Intent intent = new Intent(this, StepsChart.class);
-        intent.putExtra("mySteps", stepCount);
+        intent.putExtra("mySteps", stepsCount);
         startActivity(intent);
 
     }
