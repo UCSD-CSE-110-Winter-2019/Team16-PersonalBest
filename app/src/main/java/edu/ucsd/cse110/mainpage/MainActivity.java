@@ -184,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     public float walkingSpeed(float distance, float timeinSecs) {
-        float hour = timeinSecs / (float)360;
+        float hour = timeinSecs / (float)3600;
         System.out.println("hour is "+hour);
         float speed = distance / hour;
         System.out.println("walking speed is "+speed +" mph");
