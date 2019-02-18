@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -34,6 +35,10 @@ public class MainActivity extends AppCompatActivity {
     private TextView homeMessage;
     private TextView textSteps;
     private long stepsCount;
+    private long walkStepsCount;
+    private long startTime;
+    private long endTime;
+    private long startSteps;
     SharedPreferences userSharedPref;
 
     public static final String FITNESS_SERVICE_KEY = "FITNESS_SERVICE_KEY";
@@ -121,6 +126,8 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 if(walk_button.getText()== getString(R.string.start_button))
                 {
+                    startTime= System.currentTimeMillis();
+                    startSteps = stepsCount;
                     homeMessage.setBackgroundResource(R.drawable.accent_background);
                     textSteps.setBackgroundResource(R.drawable.accent_background);
                     view.setBackgroundResource(R.drawable.end_button_bg_round);
@@ -129,6 +136,17 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else
                 {
+                    walkStepsCount = stepsCount - startSteps;
+                    float walkDistance = stepsToDistance(walkStepsCount);
+                    endTime = System.currentTimeMillis();
+                    long walkTime = endTime - startTime;
+                    Toast toast = Toast.makeText(getApplicationContext(),
+                            "You've just walked for " + walkStepsCount + " steps over " +
+                                    walkTime / 1000 + " seconds!",
+                    Toast.LENGTH_SHORT);
+                    toast.show();
+                    setDistanceTextView(walkDistance);
+                    walkingSpeed(walkDistance, walkTime);
                     homeMessage.setBackgroundResource(R.drawable.primary_background);
                     textSteps.setBackgroundResource(R.drawable.primary_background);
                     view.setBackgroundResource(R.drawable.start_button_bg_round);

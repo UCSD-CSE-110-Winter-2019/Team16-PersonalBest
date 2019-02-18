@@ -44,7 +44,7 @@ public class personalBestespresso {
         appCompatButton.perform(click());
 
         ViewInteraction appCompatButton2 = onView(
-                allOf(withId(R.id.personalbestBtn), withText("Check Personal Best"),
+                allOf(withId(R.id.personalbestBtn), withText("My Best"),
                         childAtPosition(
                                 allOf(withId(R.id.container),
                                         childAtPosition(
