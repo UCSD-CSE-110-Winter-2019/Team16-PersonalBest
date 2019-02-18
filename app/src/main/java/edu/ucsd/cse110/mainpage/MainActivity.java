@@ -126,6 +126,7 @@ public class MainActivity extends AppCompatActivity {
 
             if (requestCode == fitnessService.getRequestCode()) {
                 fitnessService.updateStepCount();
+                stepsToDistance();
             }
         } else {
             Log.e(TAG, "ERROR, google fit result code: " + resultCode);
