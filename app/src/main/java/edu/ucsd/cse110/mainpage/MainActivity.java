@@ -9,6 +9,8 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import edu.ucsd.cse110.mainpage.fitness.FitnessService;
@@ -26,6 +28,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
     private FitnessService fitnessService;
+
+
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -61,6 +65,22 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(promptHeightIntent, 0);
         }
 
+        final Button walk_button = (Button) findViewById(R.id.walk_button);
+        walk_button.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View view) {
+               if(walk_button.getText() == getString(R.string.start_button))
+               {
+                   view.setBackgroundResource(R.drawable.end_button_bg_round);
+                   walk_button.setText(getString(R.string.end_button));
+               }
+               else
+               {
+                   view.setBackgroundResource(R.drawable.start_button_bg_round);
+                   walk_button.setText(getString(R.string.start_button));
+               }
+           }
+        });
 
 
         textSteps = findViewById(R.id.stepsView);
