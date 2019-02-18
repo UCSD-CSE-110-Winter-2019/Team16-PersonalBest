@@ -81,11 +81,11 @@ public class MainActivity extends AppCompatActivity {
 
         int height = userSharedPref.getInt("height",-1);
         stepsCount = userSharedPref.getLong("steps", 0);
+
         if (height == -1) {
             Intent promptHeightIntent = new Intent(this, EnterHeightActivity.class);
             startActivityForResult(promptHeightIntent, 0);
         }
-
 
 
         textSteps = findViewById(R.id.stepsView);
@@ -107,10 +107,11 @@ public class MainActivity extends AppCompatActivity {
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
-        UpdateStepsAsyncTask task = new UpdateStepsAsyncTask( fitnessService );
+        UpdateStepsAsyncTask task = new UpdateStepsAsyncTask(fitnessService);
         task.execute();
 
-        stepsToDistance();
+        //values used for testing, replace with actual value
+        walkingSpeed(stepsToDistance(),500);
     }
 
     @Override
@@ -118,6 +119,7 @@ public class MainActivity extends AppCompatActivity {
 
         // close if the height is not set
         int height = userSharedPref.getInt("height",-1);
+
         if (height == -1) {
             finish();
         }
@@ -146,15 +148,17 @@ public class MainActivity extends AppCompatActivity {
 
 
     public float stepsToDistance(){
+
         //find your average stride length
         int height = userSharedPref.getInt("height", -1);
         stepsCount = userSharedPref.getLong("steps", 0);
         fitnessService.updateStepCount();
         float strideLength = 0;
-        if(height != -1){
-            strideLength = (float)(height * 0.413);
+        if (height != -1) {
+            strideLength = (float) (height * 0.413);
             System.out.println("\n\n\n\nstrideLength is........." + strideLength);
         }
+
         float feetPerStride = strideLength/12;
         float stepsPerMile = 5280/feetPerStride;
         float totalDistanceMiles = stepsCount/stepsPerMile;
@@ -164,6 +168,7 @@ public class MainActivity extends AppCompatActivity {
         return totalDistanceMiles;
 
     }
+
 
     public void setDistanceTextView(float totalDistance){
         TextView distance = (TextView)findViewById(R.id.distanceTView);
@@ -176,4 +181,28 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
 
     }
+
+
+    public float walkingSpeed(float distance, float timeinSecs) {
+        float hour = timeinSecs / (float)360;
+        System.out.println("hour is "+hour);
+        float speed = distance / hour;
+        System.out.println("walking speed is "+speed +" mph");
+        return speed;
+    }
+
+
+    public void updatePersonalBest(View view) {
+        SharedPreferences perBest = getSharedPreferences("personalBest", MODE_PRIVATE);
+        System.out.println("Personal Best is "+ perBest.getLong("personalBest",0));
+        if(perBest.getLong("personalBest",0)<stepsCount){
+            SharedPreferences.Editor editor = perBest.edit();
+            editor.putLong("personalBest", stepsCount);
+            editor.commit();
+        }
+        TextView personalBest = (TextView)findViewById(R.id.personalBest);
+        long bestSteps= perBest.getLong("personalBest",0);
+        personalBest.setText(String.valueOf(bestSteps));
+    }
 }
+
