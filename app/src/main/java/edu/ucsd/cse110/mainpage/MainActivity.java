@@ -1,5 +1,6 @@
 package edu.ucsd.cse110.mainpage;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.app.Activity;
 import android.content.Intent;
@@ -161,8 +162,6 @@ public class MainActivity extends AppCompatActivity {
         task.execute();
         fitnessService.updateStepCount();
 
-        //values used for testing, replace with actual value
-        walkingSpeed(stepsToDistance(stepsCount),500);
     }
 
     @Override
@@ -194,6 +193,7 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences.Editor editor = userSharedPref.edit();
         editor.putLong("steps", stepCount);
         editor.apply();
+        showEncouragement(stepsCount);
         //stepsToDistance(stepCount);
     }
 
@@ -253,6 +253,18 @@ public class MainActivity extends AppCompatActivity {
         TextView personalBest = (TextView)findViewById(R.id.personalBest);
         long bestSteps= userSharedPref.getLong("personalBest",0);
         personalBest.setText("Best: " + String.valueOf(bestSteps) + " Steps");
+    }
+
+    public void showEncouragement(long steps){
+        if(steps>= 5) {
+            long percentage = steps / 100;
+            Context context = getApplicationContext();
+            CharSequence text = "Good job! You're already at " + percentage + "% of the daily recommended number of steps.";
+            int duration = Toast.LENGTH_LONG;
+
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
+        }
     }
 }
 

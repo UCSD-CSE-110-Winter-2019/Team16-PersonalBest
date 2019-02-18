@@ -111,7 +111,6 @@
             android:paddingHorizontal="@dimen/content_padding"
             android:layout_gravity="center_horizontal"
             android:background="@drawable/start_button_bg_round"
-            android:onClick="updatePersonalBest"
             android:text="@string/pr_button"
             android:textColor="@color/lightText"
             />
