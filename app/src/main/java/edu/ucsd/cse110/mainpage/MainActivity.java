@@ -188,6 +188,8 @@ public class MainActivity extends AppCompatActivity {
         System.out.println("hour is "+hour);
         float speed = distance / hour;
         System.out.println("walking speed is "+speed +" mph");
+        TextView speedTView = (TextView)findViewById(R.id.walkingSpeed);
+        speedTView.setText(""+speed);
         return speed;
     }
 
