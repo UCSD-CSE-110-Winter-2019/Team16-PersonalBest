@@ -230,7 +230,6 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, StepsChart.class);
         intent.putExtra("mySteps", stepsCount);
         startActivity(intent);
-
     }
 
 
