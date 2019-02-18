@@ -1,7 +1,5 @@
 package edu.ucsd.cse110.mainpage;
 
-import android.graphics.Color;
-import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -16,30 +14,28 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.fitness.Fitness;
-import com.google.android.gms.fitness.data.DataSet;
-import com.google.android.gms.fitness.data.DataType;
-import com.google.android.gms.fitness.data.Field;
-import com.google.android.gms.fitness.result.DailyTotalResult;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-
 import edu.ucsd.cse110.mainpage.fitness.FitnessService;
 import edu.ucsd.cse110.mainpage.fitness.FitnessServiceFactory;
 import edu.ucsd.cse110.mainpage.fitness.GoogleFitAdapter;
 
-public class MainActivity extends AppCompatActivity {
+import edu.ucsd.cse110.mainpage.classes.DistanceCalculator;
+import edu.ucsd.cse110.mainpage.classes.SpeedCalculator;
+import edu.ucsd.cse110.mainpage.classes.TimeCalculator;
+import edu.ucsd.cse110.mainpage.classes.StepCounter;
 
+public class MainActivity extends AppCompatActivity {
+    private TimeCalculator timer;
+    private StepCounter stepper;
     private TextView homeMessage;
     private TextView textSteps;
+    private TextView speedTView;
+    private TextView distance;
     private long stepsCount;
     private long walkStepsCount;
-    private long startTime;
-    private long endTime;
-    private long startSteps;
+    private long walkTime;
+    private float walkSpeed;
+    private float walkDistance;
+    private int height;
     SharedPreferences userSharedPref;
     private long currGoalNum = 0;
     public EditText currentGoal;
@@ -76,28 +72,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Button chartsPageBtn = (Button)findViewById(R.id.StepsChartBtn);
-        chartsPageBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                goToChartsPage();
-            }
-        });
-
         currentGoal = (EditText)findViewById(R.id.currGoal);
         //currentGoal.setHint("Set Goal");
 
             System.out.println("goal is......." + currGoalNum );
-
-
-
-
-        Button personalBestBtn = (Button)findViewById(R.id.personalbestBtn);
-        personalBestBtn.setOnClickListener(new View.OnClickListener(){
-            public void onClick (View v){
-                updatePersonalBest();
-            }
-        });
 
         Button setGoalBtn = (Button)findViewById(R.id.goalBtn);
         setGoalBtn.setOnClickListener(new View.OnClickListener(){
@@ -106,21 +84,28 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // Keep track of user preferences
         userSharedPref = getSharedPreferences("userdata", MODE_PRIVATE);
         currGoalNum = userSharedPref.getLong("stepGoal", 0);
         currentGoal.setText(""+currGoalNum);
-
         userSharedPref.edit().clear().commit();
-
-        int height = userSharedPref.getInt("height",-1);
+        height = userSharedPref.getInt("height",-1);
         stepsCount = userSharedPref.getLong("steps", 0);
+
+        // Create a timer and a stepper to time and count steps for a walk
+        timer = new TimeCalculator();
+        stepper = new StepCounter();
+
+        // Keep track of all of the Text Views to change
+        homeMessage = (TextView) findViewById(R.id.message);
+        speedTView = (TextView)findViewById(R.id.walkingSpeed);
+        textSteps = findViewById(R.id.stepsView);
+        distance = (TextView)findViewById(R.id.distanceTView);
 
         if (height == -1) {
             Intent promptHeightIntent = new Intent(this, EnterHeightActivity.class);
             startActivityForResult(promptHeightIntent, 0);
         }
-
-        textSteps = findViewById(R.id.stepsView);
 
         FitnessServiceFactory.put(fitnessServiceKey, new FitnessServiceFactory.BluePrint() {
             @Override
@@ -129,46 +114,69 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //fitnessService = FitnessServiceFactory.create(fitnessServiceKey,this);
-        //fitnessService.setup(); ----> this is the code that keeps terminating the app upon page load
-        //String fitnessServiceKey = getIntent().getStringExtra(FITNESS_SERVICE_KEY);
         fitnessService = FitnessServiceFactory.create(fitnessServiceKey, this);
         fitnessService.setup();
 
-        homeMessage = (TextView) findViewById(R.id.message);
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
+        // Create a button to go to charts
+        Button chartsPageBtn = (Button)findViewById(R.id.StepsChartBtn);
+        chartsPageBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                goToChartsPage();
+            }
+        });
+
+        // Create a button to update personal best
+        Button personalBestBtn = (Button)findViewById(R.id.personalbestBtn);
+        personalBestBtn.setOnClickListener(new View.OnClickListener(){
+            public void onClick (View v){
+                updatePersonalBest();
+            }
+        });
+
+        // Create a button to start and stop walks
         final Button walk_button = (Button) findViewById(R.id.walk_button);
-        walk_button.setTextColor(Color.WHITE);
         walk_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                // Start the walk
                 if(walk_button.getText()== getString(R.string.start_button))
                 {
-                    startTime= System.currentTimeMillis();
-                    startSteps = stepsCount;
-                    homeMessage.setBackgroundResource(R.drawable.accent_background);
-                    textSteps.setBackgroundResource(R.drawable.accent_background);
+                    // Start keeping track of the walk
+                    timer.startTimer();
+                    stepper.startSteps(stepsCount);
+
+                    // Update the view of the button
+                    makeAccent(homeMessage);
+                    makeAccent(textSteps);
                     view.setBackgroundResource(R.drawable.end_button_bg_round);
                     homeMessage.setText(getString(R.string.title_walk));
                     walk_button.setText(getString(R.string.end_button));
                 }
+
+                // Stop the walk
                 else
                 {
-                    walkStepsCount = stepsCount - startSteps;
-                    float walkDistance = stepsToDistance(walkStepsCount);
-                    endTime = System.currentTimeMillis();
-                    long walkTime = endTime - startTime;
-                    Toast toast = Toast.makeText(getApplicationContext(),
-                            "You've just walked for " + walkStepsCount + " steps over " +
-                                    walkTime / 1000 + " seconds!",
-                    Toast.LENGTH_SHORT);
-                    toast.show();
+                    // Find steps distance, speed, and time for the walk
+                    fitnessService.updateStepCount();
+                    walkStepsCount = stepper.getSteps(stepsCount);
+                    walkDistance = DistanceCalculator.stepsToDistance(walkStepsCount, height);
+                    walkSpeed = SpeedCalculator.walkingSpeed(walkDistance, walkTime);
+                    walkTime = timer.getWalkTime();
+
+                    // Provide the user information about the walk
+                    toaster("You walked for " + walkStepsCount + " steps over " + walkTime / 1000
+                            + " seconds!");
+                    setSpeedTextView(walkSpeed);
                     setDistanceTextView(walkDistance);
-                    walkingSpeed(walkDistance, walkTime);
-                    homeMessage.setBackgroundResource(R.drawable.primary_background);
-                    textSteps.setBackgroundResource(R.drawable.primary_background);
+
+                    // Update the view of the button
+                    makePrimary(homeMessage);
+                    makePrimary(textSteps);
                     view.setBackgroundResource(R.drawable.start_button_bg_round);
                     homeMessage.setText(getString(R.string.title_home));
                     walk_button.setText(getString(R.string.start_button));
@@ -180,9 +188,6 @@ public class MainActivity extends AppCompatActivity {
         UpdateStepsAsyncTask task = new UpdateStepsAsyncTask(fitnessService);
         task.execute();
         fitnessService.updateStepCount();
-
-        //values used for testing, replace with actual value
-        walkingSpeed(stepsToDistance(stepsCount),500);
     }
 
 
@@ -200,53 +205,64 @@ public class MainActivity extends AppCompatActivity {
 
             if (requestCode == fitnessService.getRequestCode()) {
                 fitnessService.updateStepCount();
-                stepsToDistance(stepsCount);
+                DistanceCalculator.stepsToDistance(stepsCount, height);
             }
         } else {
             Log.e(TAG, "ERROR, google fit result code: " + resultCode);
         }
     }
 
+    /**
+     * Set the number of steps
+     */
+
     public void setStepCount(long stepCount) {
         textSteps.setText(String.valueOf(stepCount) + " Steps");
         this.stepsCount = stepCount;
-        //System.out.println("\n\n\n\n my steps1 taken are ........." + stepCount);
-        //System.out.println("\n\n\n\n my stepsCount taken are ........." + stepsCount);
         SharedPreferences.Editor editor = userSharedPref.edit();
         editor.putLong("steps", stepCount);
         editor.apply();
-        //stepsToDistance(stepCount);
     }
 
-
-    public float stepsToDistance(long steps){
-
-        //find your average stride length
-        int height = userSharedPref.getInt("height", -1);
-        //stepsCount = userSharedPref.getLong("steps", 0);
-        fitnessService.updateStepCount();
-        float strideLength = 0;
-        if (height != -1) {
-            strideLength = (float) (height * 0.413);
-            //System.out.println("\n\n\n\nstrideLength is........." + strideLength);
-        }
-
-        float feetPerStride = strideLength/12;
-        float stepsPerMile = 5280/feetPerStride;
-        float totalDistanceMiles = steps/stepsPerMile;
-        //System.out.println("\n\n\n\n my steps taken are ........." + steps);
-        //System.out.println("\n\n\n\ntotalDistance is........." + totalDistanceMiles);
-        setDistanceTextView(totalDistanceMiles);
-        return totalDistanceMiles;
-
-    }
-
-
+    /**
+     * Set the distance text
+     */
     public void setDistanceTextView(float totalDistance){
-        TextView distance = (TextView)findViewById(R.id.distanceTView);
         distance.setText("Dist: "+totalDistance+" miles");
     }
 
+    /**
+     * Set the speed text
+     */
+    public void setSpeedTextView(float walkSpeed) {
+        speedTView.setText(walkSpeed + " mph");
+    }
+
+    /**
+     * Makes a view a primary color
+     */
+    public void makePrimary(View v) {
+        v.setBackgroundResource(R.drawable.primary_background);
+    }
+
+    /**
+     * Makes a view an accent color
+     */
+    public void makeAccent(View v) {
+        v.setBackgroundResource(R.drawable.accent_background);
+    }
+
+    /**
+     * Makes a toast
+     */
+    public void toaster (String s) {
+        Toast toast = Toast.makeText(getApplicationContext(), s , Toast.LENGTH_SHORT);
+        toast.show();
+    }
+
+    /**
+     * Switches to the charts view
+     */
     public void goToChartsPage(){
         Intent intent = new Intent(this, StepsChart.class);
         intent.putExtra("mySteps", stepsCount);
@@ -254,17 +270,9 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-
-    public float walkingSpeed(float distance, float timeinSecs) {
-        float hour = timeinSecs / (float)3600;
-        System.out.println("hour is "+hour);
-        float speed = distance / hour;
-        System.out.println("walking speed is "+speed +" mph");
-        TextView speedTView = (TextView)findViewById(R.id.walkingSpeed);
-        speedTView.setText(speed + " mph");
-        return speed;
-    }
-
+    /**
+     * Updates your personal best
+     */
     public void updatePersonalBest(){
         //System.out.println("Personal Best is " + userSharedPref.getLong("userdata", 0));
         if (userSharedPref.getLong("personalBest", 0) < stepsCount) {
