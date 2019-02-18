@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private int height;
     SharedPreferences userSharedPref;
 
+    // Google Fit Set up
     public static final String FITNESS_SERVICE_KEY = "FITNESS_SERVICE_KEY";
     private String fitnessServiceKey = "GOOGLE_FIT";
 
@@ -69,10 +70,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        userSharedPref = getSharedPreferences("userdata", MODE_PRIVATE);
-
-        userSharedPref.edit().clear().commit();
         // Keep track of user preferences
+        userSharedPref = getSharedPreferences("userdata", MODE_PRIVATE);
+        userSharedPref.edit().clear().commit();
         height = userSharedPref.getInt("height",-1);
         stepsCount = userSharedPref.getLong("steps", 0);
 

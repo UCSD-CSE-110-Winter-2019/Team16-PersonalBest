@@ -1,5 +1,8 @@
 package edu.ucsd.cse110.mainpage.classes;
 
+/**
+ * This class is used to maintain the steps for a walk
+ */
 public class StepCounter {
     private long currentsteps;
 
