@@ -76,6 +76,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        Button personalBestBtn = (Button)findViewById(R.id.personalbestBtn);
+        personalBestBtn.setOnClickListener(new View.OnClickListener(){
+            public void onClick (View v){
+                updatePersonalBest();
+            }
+        });
+
         userSharedPref = getSharedPreferences("userdata", MODE_PRIVATE);
 
         userSharedPref.edit().apply();
@@ -219,10 +226,9 @@ public class MainActivity extends AppCompatActivity {
         return speed;
     }
 
-
-    public void updatePersonalBest(View view) {
-        System.out.println("Personal Best is "+ userSharedPref.getLong("userdata",0));
-        if(userSharedPref.getLong("personalBest",0)<stepsCount){
+    public void updatePersonalBest(){
+        System.out.println("Personal Best is " + userSharedPref.getLong("userdata", 0));
+        if (userSharedPref.getLong("personalBest", 0) < stepsCount) {
             SharedPreferences.Editor editor = userSharedPref.edit();
             editor.putLong("personalBest", stepsCount);
             editor.apply();
