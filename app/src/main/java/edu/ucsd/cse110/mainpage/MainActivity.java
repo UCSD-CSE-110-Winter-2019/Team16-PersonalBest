@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
         task.execute();
 
         //values used for testing, replace with actual value
-        walkingSpeed(stepsToDistance(),500);
+        walkingSpeed(stepsToDistance(stepsCount),500);
     }
 
     @Override
@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
 
             if (requestCode == fitnessService.getRequestCode()) {
                 fitnessService.updateStepCount();
-                stepsToDistance();
+                stepsToDistance(stepsCount);
             }
         } else {
             Log.e(TAG, "ERROR, google fit result code: " + resultCode);
@@ -147,11 +147,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public float stepsToDistance(){
+    public float stepsToDistance(long steps){
 
         //find your average stride length
         int height = userSharedPref.getInt("height", -1);
-        stepsCount = userSharedPref.getLong("steps", 0);
+        //stepsCount = userSharedPref.getLong("steps", 0);
         fitnessService.updateStepCount();
         float strideLength = 0;
         if (height != -1) {
@@ -161,8 +161,8 @@ public class MainActivity extends AppCompatActivity {
 
         float feetPerStride = strideLength/12;
         float stepsPerMile = 5280/feetPerStride;
-        float totalDistanceMiles = stepsCount/stepsPerMile;
-        System.out.println("\n\n\n\n my steps taken are ........." + stepsCount);
+        float totalDistanceMiles = steps/stepsPerMile;
+        System.out.println("\n\n\n\n my steps taken are ........." + steps);
         System.out.println("\n\n\n\ntotalDistance is........." + totalDistanceMiles);
         setDistanceTextView(totalDistanceMiles);
         return totalDistanceMiles;
@@ -193,15 +193,14 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void updatePersonalBest(View view) {
-        SharedPreferences perBest = getSharedPreferences("personalBest", MODE_PRIVATE);
-        System.out.println("Personal Best is "+ perBest.getLong("personalBest",0));
-        if(perBest.getLong("personalBest",0)<stepsCount){
-            SharedPreferences.Editor editor = perBest.edit();
+        System.out.println("Personal Best is "+ userSharedPref.getLong("userdata",0));
+        if(userSharedPref.getLong("personalBest",0)<stepsCount){
+            SharedPreferences.Editor editor = userSharedPref.edit();
             editor.putLong("personalBest", stepsCount);
-            editor.commit();
+            editor.apply();
         }
         TextView personalBest = (TextView)findViewById(R.id.personalBest);
-        long bestSteps= perBest.getLong("personalBest",0);
+        long bestSteps= userSharedPref.getLong("personalBest",0);
         personalBest.setText(String.valueOf(bestSteps));
     }
 }
