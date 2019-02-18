@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private long currGoalNum = 0;
     public EditText currentGoal;
 
+    // Google Fit Set up
     public static final String FITNESS_SERVICE_KEY = "FITNESS_SERVICE_KEY";
     private String fitnessServiceKey = "GOOGLE_FIT";
 
@@ -72,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+<<<<<<< HEAD
         currentGoal = (EditText)findViewById(R.id.currGoal);
         //currentGoal.setHint("Set Goal");
 
@@ -88,6 +90,10 @@ public class MainActivity extends AppCompatActivity {
         userSharedPref = getSharedPreferences("userdata", MODE_PRIVATE);
         currGoalNum = userSharedPref.getLong("stepGoal", 0);
         currentGoal.setText(""+currGoalNum);
+=======
+        // Keep track of user preferences
+        userSharedPref = getSharedPreferences("userdata", MODE_PRIVATE);
+>>>>>>> Add some more comments
         userSharedPref.edit().clear().commit();
         height = userSharedPref.getInt("height",-1);
         stepsCount = userSharedPref.getLong("steps", 0);

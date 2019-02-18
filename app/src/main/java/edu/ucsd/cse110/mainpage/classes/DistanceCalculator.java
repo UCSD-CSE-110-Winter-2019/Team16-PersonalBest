@@ -1,5 +1,8 @@
 package edu.ucsd.cse110.mainpage.classes;
 
+/**
+ * This class is used to calculate distance
+ */
 public class DistanceCalculator {
 
     public static float stepsToDistance(long steps, int height) {
