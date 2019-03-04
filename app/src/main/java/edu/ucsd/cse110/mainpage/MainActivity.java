@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
         currentGoal.setText(""+currGoalNum);
         // Keep track of user preferences
         userSharedPref = getSharedPreferences("userdata", MODE_PRIVATE);
-        userSharedPref.edit().clear().commit();
+       // userSharedPref.edit().clear().commit();
         height = userSharedPref.getInt("height",-1);
         stepsCount = userSharedPref.getLong("steps", 0);
 
