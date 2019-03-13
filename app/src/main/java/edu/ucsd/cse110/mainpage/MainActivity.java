@@ -153,88 +153,68 @@ public class MainActivity extends AppCompatActivity {
         fitnessService = FitnessServiceFactory.create(fitnessServiceKey, this);
         fitnessService.setup();
 
+        //code for adding a new user to the database and for checking if the user already exists in
+        //the database, then not add that user to the database.
         userDocString = userSharedPref.getString("userIDinDB", "");
-        db = FirebaseFirestore.getInstance();
-        db.collection("users")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            if(!task.getResult().isEmpty()) {
-                                int numOfDocs = task.getResult().size();
-                                for (QueryDocumentSnapshot document : task.getResult()) {
-                                    Log.d(TAG, document.getId() + " => " + document.getData());
-                                    numOfDocs = numOfDocs - 1;
-                                    if (document.getId().equals(userDocString)) {
-                                        userInDBBool = true;
-                                        System.out.println("checkuserindatabase if case................................");
-                                        return;
-                                    } else {
-                                        if (numOfDocs == 1){
-                                            // Create a new user with a first and last name
-                                            Map<String, Object> user = new HashMap<>();
-                                            ArrayList<String> regStepsDataArr = new ArrayList<String>();
-                                            ArrayList<String> walkedStepsDataArr = new ArrayList<String>();
-                                            user.put("regularStepsData", regStepsDataArr);
-                                            user.put("walkedStepsData", walkedStepsDataArr);
-
-                                            System.out.println("userDocString is elseif case...................................."+ userDocString);
-
-                                            // Add a new document with a generated ID
-                                            db.collection("users")
-                                                    .document(userDocString).set(user)
-                                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                        @Override
-                                                        public void onSuccess(Void v) {
-
-                                                        }
-                                                    })
-                                                    .addOnFailureListener(new OnFailureListener() {
-                                                        @Override
-                                                        public void onFailure(@NonNull Exception e) {
-                                                            Log.w(TAG, "Error adding document", e);
-                                                        }
-                                                    });
-                                        }
-                                    }
-
-                                }
-                            }
-                        } else {
-                            Log.w(TAG, "Error getting documents.", task.getException());
-                        }
-                    }
-                });
         if(userDocString.equals("")){
             System.out.println("userDocString is null....................................");
         }
-       /* else if(!userInDBBool){
-            // Create a new user with a first and last name
-            Map<String, Object> user = new HashMap<>();
-            ArrayList<String> regStepsDataArr = new ArrayList<String>();
-            ArrayList<String> walkedStepsDataArr = new ArrayList<String>();
-            user.put("regularStepsData", regStepsDataArr);
-            user.put("walkedStepsData", walkedStepsDataArr);
-
-            System.out.println("userDocString is elseif case...................................."+ userDocString);
-
-            // Add a new document with a generated ID
+        else {
+            db = FirebaseFirestore.getInstance();
             db.collection("users")
-                    .document(userDocString).set(user)
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                         @Override
-                        public void onSuccess(Void v) {
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                if (!task.getResult().isEmpty()) {
+                                    int numOfDocs = task.getResult().size();
+                                    for (QueryDocumentSnapshot document : task.getResult()) {
+                                        Log.d(TAG, document.getId() + " => " + document.getData());
+                                        numOfDocs = numOfDocs - 1;
+                                        if (document.getId().equals(userDocString)) {
+                                            userInDBBool = true;
+                                            System.out.println("checkuserindatabase if case................................");
+                                            return;
+                                        } else {
+                                            if (numOfDocs == 1) {
+                                                // Create a new user with a first and last name
+                                                Map<String, Object> user = new HashMap<>();
+                                                ArrayList<String> regStepsDataArr = new ArrayList<String>();
+                                                ArrayList<String> walkedStepsDataArr = new ArrayList<String>();
+                                                user.put("regularStepsData", regStepsDataArr);
+                                                user.put("walkedStepsData", walkedStepsDataArr);
 
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.w(TAG, "Error adding document", e);
+                                                System.out.println("userDocString is elseif case...................................." + userDocString);
+
+                                                // Add a new document with a generated ID
+                                                db.collection("users")
+                                                        .document(userDocString).set(user)
+                                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                            @Override
+                                                            public void onSuccess(Void v) {
+
+                                                            }
+                                                        })
+                                                        .addOnFailureListener(new OnFailureListener() {
+                                                            @Override
+                                                            public void onFailure(@NonNull Exception e) {
+                                                                Log.w(TAG, "Error adding document", e);
+                                                            }
+                                                        });
+                                            }
+                                        }
+
+                                    }
+                                }
+                            } else {
+                                Log.w(TAG, "Error getting documents.", task.getException());
+                            }
                         }
                     });
-        }*/
+        }//end of add user to DB code
+
+
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 

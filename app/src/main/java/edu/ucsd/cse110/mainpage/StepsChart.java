@@ -1,7 +1,9 @@
 package edu.ucsd.cse110.mainpage;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,10 +16,15 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,11 +38,19 @@ public class StepsChart extends AppCompatActivity {
     private int StepsForToday = 0;
     private long goalSteps = 0;
     ArrayList<ILineDataSet> lineDataSets = new ArrayList<>();
+    FirebaseFirestore db;
+    SharedPreferences pref;
+    String userDocString;
+    private static final String TAG = "StepsChart";
+    ArrayList<String> regSteps;
+    ArrayList<String> walkedSteps;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_steps_chart);
+
+        pref = getSharedPreferences("userdata", MODE_PRIVATE);
 
         Intent intent= getIntent();
         Bundle bundle = intent.getExtras();
@@ -82,9 +97,36 @@ public class StepsChart extends AppCompatActivity {
     }
 
     private ArrayList<Entry> getLineDataValues() {
-        ArrayList<Entry> entryArrayList = new ArrayList<>();
+        final ArrayList<Entry> entryArrayList = new ArrayList<>();
 
         //hardcoded step values for Monday to Saturday since I didn't have access to an android phone then.
+        db = FirebaseFirestore.getInstance();
+        userDocString = pref.getString("userIDinDB", "");
+
+        if(!userDocString.equals("")) {
+            DocumentReference user = db.collection("users").document(userDocString);
+
+            user.get()
+                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if (task.isSuccessful()) {
+
+                                regSteps = (ArrayList<String>) task.getResult().get("regularStepsData");
+                                walkedSteps = (ArrayList<String>) task.getResult().get("walkedStepsData");
+
+                                System.out.println("regSteps.................." + regSteps);
+                                System.out.println("walkedSteps.................." + walkedSteps);
+
+
+                            } else {
+                                Log.w(TAG, "Error getting documents.", task.getException());
+
+                            }
+                        }
+                    });
+
+        }
 
         Entry e1 = new Entry(3460f, 0);
         Entry e2 = new Entry(3400f, 1);
