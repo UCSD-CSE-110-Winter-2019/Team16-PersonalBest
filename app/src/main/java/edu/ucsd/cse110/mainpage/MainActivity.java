@@ -70,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean isNewUser = true;
     String userDocString;
     boolean userInDBBool = false;
+    FirebaseFirestore db;
 
     // Google Fit Set up
     public static final String FITNESS_SERVICE_KEY = "FITNESS_SERVICE_KEY";
@@ -153,20 +154,52 @@ public class MainActivity extends AppCompatActivity {
         fitnessService.setup();
 
         userDocString = userSharedPref.getString("userIDinDB", "");
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db = FirebaseFirestore.getInstance();
         db.collection("users")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d(TAG, document.getId() + " => " + document.getData());
-                                if(document.getId().equals(userDocString)){
-                                    userInDBBool = true;
-                                    System.out.println("checkuserindatabase if case................................");
-                                }
+                            if(!task.getResult().isEmpty()) {
+                                int numOfDocs = task.getResult().size();
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    Log.d(TAG, document.getId() + " => " + document.getData());
+                                    numOfDocs = numOfDocs - 1;
+                                    if (document.getId().equals(userDocString)) {
+                                        userInDBBool = true;
+                                        System.out.println("checkuserindatabase if case................................");
+                                        return;
+                                    } else {
+                                        if (numOfDocs == 1){
+                                            // Create a new user with a first and last name
+                                            Map<String, Object> user = new HashMap<>();
+                                            ArrayList<String> regStepsDataArr = new ArrayList<String>();
+                                            ArrayList<String> walkedStepsDataArr = new ArrayList<String>();
+                                            user.put("regularStepsData", regStepsDataArr);
+                                            user.put("walkedStepsData", walkedStepsDataArr);
 
+                                            System.out.println("userDocString is elseif case...................................."+ userDocString);
+
+                                            // Add a new document with a generated ID
+                                            db.collection("users")
+                                                    .document(userDocString).set(user)
+                                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                        @Override
+                                                        public void onSuccess(Void v) {
+
+                                                        }
+                                                    })
+                                                    .addOnFailureListener(new OnFailureListener() {
+                                                        @Override
+                                                        public void onFailure(@NonNull Exception e) {
+                                                            Log.w(TAG, "Error adding document", e);
+                                                        }
+                                                    });
+                                        }
+                                    }
+
+                                }
                             }
                         } else {
                             Log.w(TAG, "Error getting documents.", task.getException());
@@ -176,7 +209,7 @@ public class MainActivity extends AppCompatActivity {
         if(userDocString.equals("")){
             System.out.println("userDocString is null....................................");
         }
-        else if(!userInDBBool){
+       /* else if(!userInDBBool){
             // Create a new user with a first and last name
             Map<String, Object> user = new HashMap<>();
             ArrayList<String> regStepsDataArr = new ArrayList<String>();
@@ -201,7 +234,7 @@ public class MainActivity extends AppCompatActivity {
                             Log.w(TAG, "Error adding document", e);
                         }
                     });
-        }
+        }*/
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
