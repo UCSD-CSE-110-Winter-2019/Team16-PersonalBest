@@ -1,11 +1,13 @@
 package edu.ucsd.cse110.mainpage;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.TypedValue;
@@ -74,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<String> walkedSteps;
     Intent chartsIntent;
     long walkCurrentStepsCount;
+    int onlyShowGoalAlertOnceCounter=0;
 
 
     // Google Fit Set up
@@ -328,9 +331,14 @@ public class MainActivity extends AppCompatActivity {
 
     public void setStepCount(long stepCount) {
         textSteps.setText(String.valueOf(stepCount) + " Steps");
+        SharedPreferences.Editor editor = userSharedPref.edit();
+        if(stepsCount >= userSharedPref.getLong("stepGoal", 0) && onlyShowGoalAlertOnceCounter == 0){
+            onlyShowGoalAlertOnceCounter++;
+            updateGoal();
+        }
         //System.out.println("INSIDE STEP COUNT FUNCTION..............................");
         this.stepsCount = stepCount;
-        SharedPreferences.Editor editor = userSharedPref.edit();
+
         if(this.stepsCount == 0 && walkStepsCount != 0 && (userSharedPref.getLong("steps", 0) != 0)){
             System.out.println("ADD AN ARRAY ELEMENT IN FIREBASE..............................");
             walkStepsCount = 0;//update that to zero to reflect a new day
@@ -509,5 +517,40 @@ public class MainActivity extends AppCompatActivity {
 
         toast.show();
     }
+
+    public void updateGoal(){
+        if(stepsCount >= userSharedPref.getLong("stepGoal", 0)){
+            AlertDialog.Builder updateGoalDialog = new AlertDialog.Builder(this);
+            updateGoalDialog.setMessage("Congrats on reaching your goal!!\nWould you like to update your\n" +
+                    "goal to " + String.valueOf(currGoalNum+500) + "?")
+                    .setCancelable(false)
+                    .setPositiveButton("Yes!", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            currGoalNum = currGoalNum + 500;
+                            //updating the currentGoal
+                            SharedPreferences.Editor editor = userSharedPref.edit();
+                            editor.putLong("stepGoal", currGoalNum).apply();
+                            currentGoal.setText("" + currGoalNum);
+                            dialog.dismiss();
+                            onlyShowGoalAlertOnceCounter = 0;
+
+                        }
+                    }).setNegativeButton("No", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                }
+            });
+
+
+            AlertDialog alert = updateGoalDialog.create();
+            alert.setTitle("Update Goal!");
+            alert.show();
+
+
+        }
+    }
+
 }
 
