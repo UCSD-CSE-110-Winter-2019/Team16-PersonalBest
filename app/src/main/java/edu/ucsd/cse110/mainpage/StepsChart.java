@@ -115,6 +115,8 @@ public class StepsChart extends AppCompatActivity {
                                 regSteps = (ArrayList<String>) task.getResult().get("regularStepsData");
                                 walkedSteps = (ArrayList<String>) task.getResult().get("walkedStepsData");
 
+                                regSteps.add("" + StepsForToday);
+
                                 System.out.println("regSteps.................." + regSteps);
                                 System.out.println("walkedSteps.................." + walkedSteps);
 

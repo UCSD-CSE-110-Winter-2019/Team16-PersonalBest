@@ -28,6 +28,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -56,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView textSteps;
     private TextView speedTView;
     private TextView distance;
-    private long stepsCount;
+    public long stepsCount;
     private long walkStepsCount;
     private long walkTime;
     private float walkSpeed;
@@ -71,6 +72,8 @@ public class MainActivity extends AppCompatActivity {
     String userDocString;
     boolean userInDBBool = false;
     FirebaseFirestore db;
+    ArrayList<String> regSteps;
+    ArrayList<String> walkedSteps;
 
     // Google Fit Set up
     public static final String FITNESS_SERVICE_KEY = "FITNESS_SERVICE_KEY";
@@ -345,10 +348,101 @@ public class MainActivity extends AppCompatActivity {
 
     public void setStepCount(long stepCount) {
         textSteps.setText(String.valueOf(stepCount) + " Steps");
+        //System.out.println("INSIDE STEP COUNT FUNCTION..............................");
         this.stepsCount = stepCount;
         SharedPreferences.Editor editor = userSharedPref.edit();
+        if(this.stepsCount == 0 && (userSharedPref.getLong("steps", 0) != 0)){
+            System.out.println("ADD AN ARRAY ELEMENT IN FIREBASE..............................");
+            regSteps.add(regSteps.size()-1, ""+0);
+            updateRegStepsInDB(regSteps);
+        }
+        else if(userSharedPref.getLong("steps", 0) == this.stepsCount){
+            System.out.println("DON'T ADD AN ARRAY ELEMENT IN FIREBASE, no update required.....");
+        }
+        else if(userSharedPref.getLong("steps", 0) < this.stepsCount) {
+            System.out.println("UPDATE STEPCOUNT IN FIREBASE..............................");
+            fetchRegStepsArray();
+            //System.out.println("REG STEPS ARRAY IS.............................." + regSteps);
+
+        }
+
         editor.putLong("steps", stepCount);
         editor.apply();
+    }
+
+    public void updateRegStepsInDB(ArrayList<String> regSteps){
+        DocumentReference user = db.collection("users").document(userDocString);
+        user.update("regularStepsData", regSteps);
+        System.out.println("regSteps in update method are!!!!!!!!!!!!!!!" + regSteps);
+
+    }
+
+    public void updateWalkedStepsInDB(){
+        DocumentReference user = db.collection("users").document(userDocString);
+        user.update("walkedStepsData", walkedSteps);
+    }
+
+    //get the current steps arrays from the DB
+    public void fetchRegStepsArray(){
+        //hardcoded step values for Monday to Saturday since I didn't have access to an android phone then.
+        db = FirebaseFirestore.getInstance();
+        userDocString = userSharedPref.getString("userIDinDB", "");
+
+        if(!userDocString.equals("")) {
+            DocumentReference user = db.collection("users").document(userDocString);
+
+            user.get()
+                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if (task.isSuccessful()) {
+
+                                regSteps = (ArrayList<String>) task.getResult().get("regularStepsData");
+                                System.out.println("regSteps.................." + regSteps);
+                                int index = regSteps.size()-1;
+                                regSteps.set(index, ""+stepsCount);
+                                updateRegStepsInDB(regSteps);
+
+
+                            } else {
+                                Log.w(TAG, "Error getting documents.", task.getException());
+
+                            }
+                        }
+                    });
+
+        }
+
+    }
+
+    public void fetchWalkedStepsArray(){
+        //hardcoded step values for Monday to Saturday since I didn't have access to an android phone then.
+        db = FirebaseFirestore.getInstance();
+        userDocString = userSharedPref.getString("userIDinDB", "");
+
+        if(!userDocString.equals("")) {
+            DocumentReference user = db.collection("users").document(userDocString);
+
+            user.get()
+                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if (task.isSuccessful()) {
+
+                                walkedSteps = (ArrayList<String>) task.getResult().get("walkedStepsData");
+
+                                System.out.println("walkedSteps.................." + walkedSteps);
+
+
+                            } else {
+                                Log.w(TAG, "Error getting documents.", task.getException());
+
+                            }
+                        }
+                    });
+
+        }
+
     }
 
     /**
