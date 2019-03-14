@@ -117,8 +117,8 @@ public class StepsChart extends AppCompatActivity {
                                 if(regSteps.size() >= 7){
                                     regSteps = regSteps.subList(0,8);
                                 }
-                                if(walkedSteps.size() >= 7){
-                                    walkedSteps =  walkedSteps.subList(0,8);
+                                if(walkedSteps.size() >= 7) {
+                                    walkedSteps = walkedSteps.subList(0, 8);
                                 }
 
                                 for (int b = 0; b < regSteps.size() / 2; b++) {
