@@ -16,6 +16,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.mikephil.charting.data.Entry;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -66,14 +67,14 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences userSharedPref;
     private long currGoalNum = 0;
     public EditText currentGoal;
-    public String username;
-    public String userEmail;
-    public boolean isNewUser = true;
     String userDocString;
     boolean userInDBBool = false;
     FirebaseFirestore db;
     ArrayList<String> regSteps;
     ArrayList<String> walkedSteps;
+    Intent chartsIntent;
+    long walkCurrentStepsCount;
+
 
     // Google Fit Set up
     public static final String FITNESS_SERVICE_KEY = "FITNESS_SERVICE_KEY";
@@ -129,6 +130,7 @@ public class MainActivity extends AppCompatActivity {
 
         height = userSharedPref.getInt("height",-1);
         stepsCount = userSharedPref.getLong("steps", 0);
+        walkStepsCount = userSharedPref.getLong("walkedSteps", 0);
 
         // Create a timer and a stepper to time and count steps for a walk
         timer = new TimeCalculator();
@@ -248,6 +250,7 @@ public class MainActivity extends AppCompatActivity {
                 if(walk_button.getText()== getString(R.string.start_button))
                 {
                     // Start keeping track of the walk
+                    walkCurrentStepsCount = 0;
                     timer.startTimer();
                     stepper.startSteps(stepsCount);
 
@@ -264,14 +267,15 @@ public class MainActivity extends AppCompatActivity {
                 {
                     // Find steps distance, speed, and time for the walk
                     fitnessService.updateStepCount();
-                    walkStepsCount = stepper.getSteps(stepsCount);
+                    walkCurrentStepsCount =  stepper.getSteps(stepsCount);
+                    walkStepsCount = walkStepsCount + walkCurrentStepsCount;
                     fetchWalkedStepsArray();
-                    walkDistance = DistanceCalculator.stepsToDistance(walkStepsCount, height);
+                    walkDistance = DistanceCalculator.stepsToDistance(walkCurrentStepsCount, height);
                     walkTime = timer.getWalkTime();
                     walkSpeed = SpeedCalculator.walkingSpeed(walkDistance, walkTime);
 
                     // Provide the user information about the walk
-                    toaster("You walked for " + walkStepsCount + " steps over " + walkTime / 1000
+                    toaster("You walked for " + walkCurrentStepsCount + " steps over " + walkTime / 1000
                             + " seconds!");
                     setSpeedTextView(walkSpeed);
                     setDistanceTextView(walkDistance);
@@ -320,40 +324,16 @@ public class MainActivity extends AppCompatActivity {
      * Set the number of steps
      */
 
-    public boolean checkIfUserIsInDB(final String userID){
-        System.out.println("checkuserindatabase................................" + userID);
 
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("users")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d(TAG, document.getId() + " => " + document.getData());
-                                if(document.getId().equals(userDocString)){
-                                    userInDBBool = true;
-                                    System.out.println("checkuserindatabase if case................................" + userID);
-                                }
-
-                            }
-                        } else {
-                            Log.w(TAG, "Error getting documents.", task.getException());
-                        }
-                    }
-                });
-        System.out.println("userIDBOOL is ......................" + userInDBBool);
-        return userInDBBool;
-    }
 
     public void setStepCount(long stepCount) {
         textSteps.setText(String.valueOf(stepCount) + " Steps");
         //System.out.println("INSIDE STEP COUNT FUNCTION..............................");
         this.stepsCount = stepCount;
         SharedPreferences.Editor editor = userSharedPref.edit();
-        if(this.stepsCount == 0 && walkStepsCount == 0 && (userSharedPref.getLong("steps", 0) != 0)){
+        if(this.stepsCount == 0 && walkStepsCount != 0 && (userSharedPref.getLong("steps", 0) != 0)){
             System.out.println("ADD AN ARRAY ELEMENT IN FIREBASE..............................");
+            walkStepsCount = 0;//update that to zero to reflect a new day
             regSteps.add(regSteps.size()-1, ""+0);
             walkedSteps.add(walkedSteps.size()-1, ""+0);
             updateRegStepsInDB(regSteps);
@@ -406,7 +386,7 @@ public class MainActivity extends AppCompatActivity {
                                 regSteps = (ArrayList<String>) task.getResult().get("regularStepsData");
                                 //System.out.println("regSteps.................." + regSteps);
                                 int index = regSteps.size()-1;
-                                regSteps.set(index, ""+(stepsCount-walkStepsCount));
+                                regSteps.set(index, ""+ stepsCount);
                                 updateRegStepsInDB(regSteps);
 
 
@@ -493,11 +473,13 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Switches to the charts view
      */
-    public void goToChartsPage(){
-        Intent intent = new Intent(this, StepsChart.class);
-        intent.putExtra("mySteps", stepsCount);
-        intent.putExtra("goal", currGoalNum);
-        startActivity(intent);
+    public void goToChartsPage() {
+        chartsIntent = new Intent(this, StepsChart.class);
+            chartsIntent.putExtra("mySteps", stepsCount);
+            chartsIntent.putExtra("walkedSteps", walkStepsCount);
+            chartsIntent.putExtra("goal", currGoalNum);
+            startActivity(chartsIntent);
+
     }
 
     /**
