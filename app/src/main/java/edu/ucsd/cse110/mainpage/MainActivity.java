@@ -265,6 +265,7 @@ public class MainActivity extends AppCompatActivity {
                     // Find steps distance, speed, and time for the walk
                     fitnessService.updateStepCount();
                     walkStepsCount = stepper.getSteps(stepsCount);
+                    fetchWalkedStepsArray();
                     walkDistance = DistanceCalculator.stepsToDistance(walkStepsCount, height);
                     walkTime = timer.getWalkTime();
                     walkSpeed = SpeedCalculator.walkingSpeed(walkDistance, walkTime);
@@ -351,10 +352,12 @@ public class MainActivity extends AppCompatActivity {
         //System.out.println("INSIDE STEP COUNT FUNCTION..............................");
         this.stepsCount = stepCount;
         SharedPreferences.Editor editor = userSharedPref.edit();
-        if(this.stepsCount == 0 && (userSharedPref.getLong("steps", 0) != 0)){
+        if(this.stepsCount == 0 && walkStepsCount == 0 && (userSharedPref.getLong("steps", 0) != 0)){
             System.out.println("ADD AN ARRAY ELEMENT IN FIREBASE..............................");
             regSteps.add(regSteps.size()-1, ""+0);
+            walkedSteps.add(walkedSteps.size()-1, ""+0);
             updateRegStepsInDB(regSteps);
+            updateWalkedStepsInDB(walkedSteps);
         }
         else if(userSharedPref.getLong("steps", 0) == this.stepsCount){
             System.out.println("DON'T ADD AN ARRAY ELEMENT IN FIREBASE, no update required.....");
@@ -362,11 +365,13 @@ public class MainActivity extends AppCompatActivity {
         else if(userSharedPref.getLong("steps", 0) < this.stepsCount) {
             System.out.println("UPDATE STEPCOUNT IN FIREBASE..............................");
             fetchRegStepsArray();
+            fetchWalkedStepsArray();
             //System.out.println("REG STEPS ARRAY IS.............................." + regSteps);
 
         }
 
         editor.putLong("steps", stepCount);
+        editor.putLong("walkedSteps", walkStepsCount);
         editor.apply();
     }
 
@@ -377,9 +382,10 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void updateWalkedStepsInDB(){
+    public void updateWalkedStepsInDB(ArrayList<String> walkedSteps){
         DocumentReference user = db.collection("users").document(userDocString);
         user.update("walkedStepsData", walkedSteps);
+        System.out.println("walkedSteps in update method are!!!!!!!!!!!!!!!" + walkedSteps);
     }
 
     //get the current steps arrays from the DB
@@ -398,9 +404,9 @@ public class MainActivity extends AppCompatActivity {
                             if (task.isSuccessful()) {
 
                                 regSteps = (ArrayList<String>) task.getResult().get("regularStepsData");
-                                System.out.println("regSteps.................." + regSteps);
+                                //System.out.println("regSteps.................." + regSteps);
                                 int index = regSteps.size()-1;
-                                regSteps.set(index, ""+stepsCount);
+                                regSteps.set(index, ""+(stepsCount-walkStepsCount));
                                 updateRegStepsInDB(regSteps);
 
 
@@ -431,7 +437,10 @@ public class MainActivity extends AppCompatActivity {
 
                                 walkedSteps = (ArrayList<String>) task.getResult().get("walkedStepsData");
 
-                                System.out.println("walkedSteps.................." + walkedSteps);
+                               // System.out.println("walkedSteps.................." + walkedSteps);
+                                int index = walkedSteps.size()-1;
+                                walkedSteps.set(index, ""+walkStepsCount);
+                                updateWalkedStepsInDB(walkedSteps);
 
 
                             } else {
