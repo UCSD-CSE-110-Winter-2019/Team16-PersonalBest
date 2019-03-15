@@ -332,8 +332,13 @@ public class MainActivity extends AppCompatActivity {
                                                 regStepsDataArr.add(0, ""+stepsCount);
                                                 ArrayList<String> walkedStepsDataArr = new ArrayList<String>();
                                                 walkedStepsDataArr.add(0, "" + walkStepsCount);
+
+                                                ArrayList<String> friendsList = new ArrayList<String>();
+                                                ArrayList<String> pendingFriendsList = new ArrayList<String>();
                                                 user.put("regularStepsData", regStepsDataArr);
                                                 user.put("walkedStepsData", walkedStepsDataArr);
+                                                user.put("friendsList", friendsList);
+                                                user.put("pendingFriendsList", pendingFriendsList);
 
                                                 System.out.println("userDocString is elseif case...................................." + userDocString);
 

@@ -27,10 +27,23 @@
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/friendsList"
-        android:scrollbars="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="260dp"
+        android:scrollbars="vertical" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Pending Friend Requests:"
+        android:textSize="20dp"
+        android:layout_margin="20dp"
+        android:layout_marginLeft="10dp"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/pendingFriendsList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        />
+        android:scrollbars="vertical"/>
 
 
 </LinearLayout>
