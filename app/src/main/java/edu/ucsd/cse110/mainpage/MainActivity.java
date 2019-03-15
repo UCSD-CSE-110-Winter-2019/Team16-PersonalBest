@@ -281,7 +281,7 @@ public class MainActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK) {
             SharedPreferences.Editor editor = userSharedPref.edit();
             editor.putString("userIDinDB", userDocString).apply();
-            addNewUser();
+
 
             if (requestCode == fitnessService.getRequestCode()) {
 
@@ -289,6 +289,7 @@ public class MainActivity extends AppCompatActivity {
                 DistanceCalculator.stepsToDistance(stepsCount, height);
 
             }
+            addNewUser();
         } else {
             Log.e(TAG, "ERROR, google fit result code: " + resultCode);
         }
@@ -392,6 +393,8 @@ public class MainActivity extends AppCompatActivity {
         }
         else if(userSharedPref.getLong("steps", 0) == this.stepsCount){
             System.out.println("DON'T ADD AN ARRAY ELEMENT IN FIREBASE, no update required.....");
+            System.out.println(this.stepsCount + "," + userSharedPref.getLong("steps", 0));
+
         }
         else if(userSharedPref.getLong("steps", 0) < this.stepsCount) {
             System.out.println("UPDATE STEPCOUNT IN FIREBASE..............................");
