@@ -49,6 +49,7 @@ public class GoogleFitAdapter implements FitnessService {
     public String userEmail;
     public String userDocString;
     long total;
+    long NOTIFICATION_INTERVAL = 5;
     public List<String> regularStepsData;
     public DocumentReference graphData;
     GoogleSignInOptions gso;
@@ -155,6 +156,9 @@ public class GoogleFitAdapter implements FitnessService {
                                                 ? 0
                                                 : dataSet.getDataPoints().get(0).getValue(Field.FIELD_STEPS).asInt();
 
+                                if (total - activity.stepsCount >= NOTIFICATION_INTERVAL) {
+                                    activity.sendProgressNotification(total - activity.stepsCount);
+                                }
                                 activity.setStepCount(total);
                                 //Log.d(TAG, "Total steps: " + total);
                             }

@@ -1,11 +1,19 @@
 package edu.ucsd.cse110.mainpage;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -71,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
     int onlyShowGoalAlertOnceCounter=0;
     String userEmail;
     SharedPreferences.Editor editPref;
+    String CHANNEL_ID = "STEP_PROGRESS";
 
 
     // Google Fit Set up
@@ -105,6 +114,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Allows app to send notifications on Android 8.0+
+        //createNotificationChannel();
 
         currentGoal = (EditText)findViewById(R.id.currGoal);
         //currentGoal.setHint("Set Goal");
@@ -545,6 +557,48 @@ public class MainActivity extends AppCompatActivity {
             chartsIntent.putExtra("goal", currGoalNum);
             startActivity(chartsIntent);
 
+    }
+
+
+    public void sendProgressNotification(long stepsTaken) {
+        createNotificationChannel();
+        int notificationId = (int) stepsTaken;
+
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.notification_icon)
+                .setContentText("Tap to view your progress")
+                .setContentTitle("Awesome! You took " + stepsTaken + " steps toward your goal!")
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+
+        // notificationId is a unique int for each notification that you must define
+        notificationManager.notify(notificationId, builder.build());
+    }
+
+    /**
+     * Allows app to send notifications on Android 8.0
+     */
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = CHANNEL_ID;
+            String description = CHANNEL_ID;
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 
     /**
