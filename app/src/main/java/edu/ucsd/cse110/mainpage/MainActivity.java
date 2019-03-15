@@ -137,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
         userDocString = userSharedPref.getString("userIDinDB", "");
 
 
-        currGoalNum = userSharedPref.getLong("stepGoal", 0);
+        currGoalNum = userSharedPref.getLong("stepGoal", 500);
         currentGoal.setText(""+currGoalNum);
 
         height = userSharedPref.getInt("height",-1);
@@ -630,7 +630,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void updateGoal(){
-        if(stepsCount >= userSharedPref.getLong("stepGoal", 0)){
+        if(stepsCount >= userSharedPref.getLong("stepGoal", 500)){
             AlertDialog.Builder updateGoalDialog = new AlertDialog.Builder(this);
             updateGoalDialog.setMessage("Congrats on reaching your goal!!\nWould you like to update your\n" +
                     "goal to " + String.valueOf(currGoalNum+500) + "?")
