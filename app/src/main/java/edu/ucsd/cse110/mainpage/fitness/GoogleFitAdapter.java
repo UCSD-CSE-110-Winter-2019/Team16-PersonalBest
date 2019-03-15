@@ -8,8 +8,12 @@ import android.util.Log;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.common.Scopes;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.fitness.Fitness;
 import com.google.android.gms.fitness.FitnessOptions;
 import com.google.android.gms.fitness.data.DataSet;
@@ -38,6 +42,7 @@ import edu.ucsd.cse110.mainpage.MainActivity;
 
 public class GoogleFitAdapter implements FitnessService {
     private final int GOOGLE_FIT_PERMISSIONS_REQUEST_CODE = System.identityHashCode(this) & 0xFFFF;
+    String SCOPE = "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile";
     private final String TAG = "GoogleFitAdapter";
 
     public String username;
@@ -46,6 +51,7 @@ public class GoogleFitAdapter implements FitnessService {
     long total;
     public List<String> regularStepsData;
     public DocumentReference graphData;
+    GoogleSignInOptions gso;
 
     private MainActivity activity;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -62,21 +68,20 @@ public class GoogleFitAdapter implements FitnessService {
                 .build();
 
 
+
+
         if (!GoogleSignIn.hasPermissions(GoogleSignIn.getLastSignedInAccount(activity), fitnessOptions)) {
             GoogleSignIn.requestPermissions(
                     activity, // your activity
                     GOOGLE_FIT_PERMISSIONS_REQUEST_CODE,
                     GoogleSignIn.getLastSignedInAccount(activity),
                     fitnessOptions);
+
+
             System.out.println("GOOGLE ACCOUNT if..................." + GoogleSignIn.getLastSignedInAccount(activity));
 
 
         } else {
-            System.out.println("GOOGLE ACCOUNT else..................." + GoogleSignIn.getLastSignedInAccount(activity).getIdToken());
-            System.out.println("GOOGLE ACCOUNT else..................." + GoogleSignIn.getLastSignedInAccount(activity).getDisplayName());
-            System.out.println("GOOGLE ACCOUNT else..................." + GoogleSignIn.getLastSignedInAccount(activity).getEmail());
-            System.out.println("GOOGLE ACCOUNT else..................." + GoogleSignIn.getLastSignedInAccount(activity).getGivenName());
-            System.out.println("GOOGLE ACCOUNT else..................." + GoogleSignIn.getLastSignedInAccount(activity).getAccount());
 
             updateStepCount();
             startRecording();
@@ -93,19 +98,20 @@ public class GoogleFitAdapter implements FitnessService {
         if (lastSignedInAccount == null) {
             return;
         }
-        System.out.println("GOOGLE ACCOUNT start..................." + GoogleSignIn.getLastSignedInAccount(activity));
+
+        /*System.out.println("GOOGLE ACCOUNT start...................******************************" + GoogleSignIn.getLastSignedInAccount(activity));
         SharedPreferences pref = activity.getSharedPreferences("userdata", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
         editor.putString("userIDinDB", "").apply();
 
         if(pref.getString("userIDinDB", "").equals("")){
             editor.putString("userIDinDB", ""+ GoogleSignIn.getLastSignedInAccount(activity));
-            System.out.println("GOOGLE ACCOUNT start if condition..................." + GoogleSignIn.getLastSignedInAccount(activity));
+            System.out.println("GOOGLE ACCOUNT start if condition..................." + GoogleSignIn.getLastSignedInAccount(activity).getEmail());
 
 
         }
 
-        editor.apply();
+        editor.apply();*/
 
 
         Fitness.getRecordingClient(activity, lastSignedInAccount)
@@ -160,34 +166,6 @@ public class GoogleFitAdapter implements FitnessService {
                                 Log.d(TAG, "There was a problem getting the step count.", e);
                             }
                         });
-
-        /*SharedPreferences pref = activity.getSharedPreferences("userdata", Context.MODE_PRIVATE);
-        userDocString = pref.getString("userIDinDB", null);
-        System.out.println("userdocstring..................................................." + userDocString);
-
-         graphData = db.collection("users").document(pref.getString("userIDinDB", null));
-
-
-                        graphData
-                                .get()
-                                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                        if (task.isSuccessful()) {
-                                            DocumentSnapshot document = task.getResult();
-                                            regularStepsData = (List<String>) document.get("graphData");
-
-                                        } else {
-                                            Log.d(TAG, "Error getting documents: ", task.getException());
-                                        }
-                                    }
-                                });
-
-                        String regularSteps = ""+total;
-                        regularStepsData.add(regularSteps);
-                        graphData.update("graphData", regularStepsData);*/
-
-
 
 
 

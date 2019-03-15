@@ -1,6 +1,5 @@
 package edu.ucsd.cse110.mainpage;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -10,7 +9,6 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -18,14 +16,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.github.mikephil.charting.data.Entry;
-import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -36,13 +30,11 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
+
+import android.content.Intent;
 
 import edu.ucsd.cse110.mainpage.fitness.FitnessService;
 import edu.ucsd.cse110.mainpage.fitness.FitnessServiceFactory;
@@ -77,6 +69,8 @@ public class MainActivity extends AppCompatActivity {
     Intent chartsIntent;
     long walkCurrentStepsCount;
     int onlyShowGoalAlertOnceCounter=0;
+    String userEmail;
+    SharedPreferences.Editor editPref;
 
 
     // Google Fit Set up
@@ -126,10 +120,13 @@ public class MainActivity extends AppCompatActivity {
 
         // Keep track of user preferences
         userSharedPref = getSharedPreferences("userdata", MODE_PRIVATE);
+
+
+        userDocString = userSharedPref.getString("userIDinDB", "");
+
+
         currGoalNum = userSharedPref.getLong("stepGoal", 0);
         currentGoal.setText(""+currGoalNum);
-        // Keep track of user preferences
-        userSharedPref = getSharedPreferences("userdata", MODE_PRIVATE);
 
         height = userSharedPref.getInt("height",-1);
         stepsCount = userSharedPref.getLong("steps", 0);
@@ -150,7 +147,6 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(promptHeightIntent, 0);
         }
 
-
         FitnessServiceFactory.put(fitnessServiceKey, new FitnessServiceFactory.BluePrint() {
             @Override
             public FitnessService create(MainActivity stepCountActivity) {
@@ -161,66 +157,7 @@ public class MainActivity extends AppCompatActivity {
         fitnessService = FitnessServiceFactory.create(fitnessServiceKey, this);
         fitnessService.setup();
 
-        //code for adding a new user to the database and for checking if the user already exists in
-        //the database, then not add that user to the database.
-        userDocString = userSharedPref.getString("userIDinDB", "");
-        if(userDocString.equals("")){
-            System.out.println("userDocString is null....................................");
-        }
-        else {
-            db = FirebaseFirestore.getInstance();
-            db.collection("users")
-                    .get()
-                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                            if (task.isSuccessful()) {
-                                if (!task.getResult().isEmpty()) {
-                                    int numOfDocs = task.getResult().size();
-                                    for (QueryDocumentSnapshot document : task.getResult()) {
-                                        Log.d(TAG, document.getId() + " => " + document.getData());
-                                        numOfDocs = numOfDocs - 1;
-                                        if (document.getId().equals(userDocString)) {
-                                            userInDBBool = true;
-                                            System.out.println("checkuserindatabase if case................................");
-                                            return;
-                                        } else {
-                                            if (numOfDocs == 1) {
-                                                // Create a new user with a first and last name
-                                                Map<String, Object> user = new HashMap<>();
-                                                ArrayList<String> regStepsDataArr = new ArrayList<String>();
-                                                ArrayList<String> walkedStepsDataArr = new ArrayList<String>();
-                                                user.put("regularStepsData", regStepsDataArr);
-                                                user.put("walkedStepsData", walkedStepsDataArr);
 
-                                                System.out.println("userDocString is elseif case...................................." + userDocString);
-
-                                                // Add a new document with a generated ID
-                                                db.collection("users")
-                                                        .document(userDocString).set(user)
-                                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                            @Override
-                                                            public void onSuccess(Void v) {
-
-                                                            }
-                                                        })
-                                                        .addOnFailureListener(new OnFailureListener() {
-                                                            @Override
-                                                            public void onFailure(@NonNull Exception e) {
-                                                                Log.w(TAG, "Error adding document", e);
-                                                            }
-                                                        });
-                                            }
-                                        }
-
-                                    }
-                                }
-                            } else {
-                                Log.w(TAG, "Error getting documents.", task.getException());
-                            }
-                        }
-                    });
-        }//end of add user to DB code
 
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
@@ -294,9 +231,29 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+        Button addfriendsBtn = (Button)findViewById(R.id.viewFriendsBtn);
+        addfriendsBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                goToViewFriendsPage();
+            }
+        });
+
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+        GoogleSignInClient mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+        startActivityForResult(signInIntent, 134);
+
         UpdateStepsAsyncTask task = new UpdateStepsAsyncTask(fitnessService);
         task.execute();
         fitnessService.updateStepCount();
+
+
+
+
 
     }
 
@@ -305,14 +262,29 @@ public class MainActivity extends AppCompatActivity {
 
         // close if the height is not set
         int height = userSharedPref.getInt("height",-1);
-
         if (height == -1) {
             finish();
         }
 
+        Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+
+        try {
+            userDocString = task.getResult().getEmail();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+
+
         if (resultCode == RESULT_OK) {
+            SharedPreferences.Editor editor = userSharedPref.edit();
+            editor.putString("userIDinDB", userDocString).apply();
+            addNewUser();
 
             if (requestCode == fitnessService.getRequestCode()) {
+
                 fitnessService.updateStepCount();
                 DistanceCalculator.stepsToDistance(stepsCount, height);
 
@@ -320,6 +292,77 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Log.e(TAG, "ERROR, google fit result code: " + resultCode);
         }
+    }
+
+    public void addNewUser(){
+        //code for adding a new user to the database and for checking if the user already exists in
+        //the database, then not add that user to the database.
+        //userDocString = userSharedPref.getString("userIDinDB", "");
+        if(userDocString.equals("")){
+            System.out.println("userDocString is null....................................");
+        }
+        else {
+            db = FirebaseFirestore.getInstance();
+            db.collection("users")
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                if (!task.getResult().isEmpty()) {
+                                    int numOfDocs = task.getResult().size();
+                                    for (QueryDocumentSnapshot document : task.getResult()) {
+                                        Log.d(TAG, document.getId() + " => " + document.getData());
+                                        numOfDocs = numOfDocs - 1;
+                                        if (document.getId().equals(userDocString)) {
+                                            userInDBBool = true;
+                                            System.out.println("checkuserindatabase if case................................");
+                                            return;
+                                        } else {
+                                            if (numOfDocs == 0) {
+                                                stepsCount = 0;
+                                                editPref = userSharedPref.edit();
+                                                editPref.putLong("steps", 0);
+                                                editPref.putLong("walkedSteps", 0);
+                                                editPref.apply();
+                                                // Create a new user with a first and last name
+                                                Map<String, Object> user = new HashMap<>();
+                                                ArrayList<String> regStepsDataArr = new ArrayList<String>();
+                                                regStepsDataArr.add(0, ""+stepsCount);
+                                                ArrayList<String> walkedStepsDataArr = new ArrayList<String>();
+                                                walkedStepsDataArr.add(0, "" + walkStepsCount);
+                                                user.put("regularStepsData", regStepsDataArr);
+                                                user.put("walkedStepsData", walkedStepsDataArr);
+
+                                                System.out.println("userDocString is elseif case...................................." + userDocString);
+
+                                                // Add a new document with a generated ID
+                                                db.collection("users")
+                                                        .document(userDocString).set(user)
+                                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                            @Override
+                                                            public void onSuccess(Void v) {
+
+                                                            }
+                                                        })
+                                                        .addOnFailureListener(new OnFailureListener() {
+                                                            @Override
+                                                            public void onFailure(@NonNull Exception e) {
+                                                                Log.w(TAG, "Error adding document", e);
+                                                            }
+                                                        });
+                                            }
+                                        }
+
+                                    }
+                                }
+                            } else {
+                                Log.w(TAG, "Error getting documents.", task.getException());
+                            }
+                        }
+                    });
+        }//end of add user to DB code
+
     }
 
 
@@ -363,6 +406,11 @@ public class MainActivity extends AppCompatActivity {
         editor.apply();
     }
 
+    public void goToViewFriendsPage(){
+        Intent intent = new Intent(this, ViewFriendsActivity.class);
+        startActivity(intent);
+    }
+
     public void updateRegStepsInDB(ArrayList<String> regSteps){
         DocumentReference user = db.collection("users").document(userDocString);
         user.update("regularStepsData", regSteps);
@@ -393,9 +441,12 @@ public class MainActivity extends AppCompatActivity {
 
                                 regSteps = (ArrayList<String>) task.getResult().get("regularStepsData");
                                 //System.out.println("regSteps.................." + regSteps);
-                                int index = regSteps.size()-1;
-                                regSteps.set(index, ""+ stepsCount);
-                                updateRegStepsInDB(regSteps);
+                                int index = regSteps.size() - 1;
+                                if(index >= 0) {
+
+                                    regSteps.set(index, "" + stepsCount);
+                                    updateRegStepsInDB(regSteps);
+                                }
 
 
                             } else {
@@ -426,9 +477,12 @@ public class MainActivity extends AppCompatActivity {
                                 walkedSteps = (ArrayList<String>) task.getResult().get("walkedStepsData");
 
                                // System.out.println("walkedSteps.................." + walkedSteps);
+
                                 int index = walkedSteps.size()-1;
-                                walkedSteps.set(index, ""+walkStepsCount);
-                                updateWalkedStepsInDB(walkedSteps);
+                                if(index >= 0) {
+                                    walkedSteps.set(index, "" + walkStepsCount);
+                                    updateWalkedStepsInDB(walkedSteps);
+                                }
 
 
                             } else {
