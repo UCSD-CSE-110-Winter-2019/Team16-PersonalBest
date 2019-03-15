@@ -1,4 +1,4 @@
-package edu.ucsd.cse110.firebaselab.chatmessage;
+package edu.ucsd.cse110.mainpage.chatmessage;
 
 import android.util.Log;
 

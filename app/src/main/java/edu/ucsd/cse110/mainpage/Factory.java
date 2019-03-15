@@ -1,4 +1,4 @@
-package edu.ucsd.cse110.firebaselab;
+package edu.ucsd.cse110.mainpage;
 
 import java.util.HashMap;
 import java.util.Map;

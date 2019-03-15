@@ -1,6 +1,6 @@
-package edu.ucsd.cse110.firebaselab.chatmessage;
+package edu.ucsd.cse110.mainpage.chatmessage;
 
-import edu.ucsd.cse110.firebaselab.Factory;
+import edu.ucsd.cse110.mainpage.Factory;
 
 public class ChatMessageServiceFactory extends Factory<ChatMessageService> {
     private static ChatMessageServiceFactory instance;

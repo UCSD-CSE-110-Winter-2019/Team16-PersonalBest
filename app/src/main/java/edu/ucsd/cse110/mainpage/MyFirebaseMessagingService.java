@@ -1,4 +1,4 @@
-package edu.ucsd.cse110.firebaselab;
+package edu.ucsd.cse110.mainpage;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
