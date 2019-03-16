@@ -197,7 +197,7 @@ public class ViewFriendsActivity extends AppCompatActivity {
 
         myDataset = friendsArr.toArray(new String[friendsArr.size()]);
         pendingFriendDataSet = pendingFriendsArr.toArray(new String[friendsArr.size()]);
-        RecyclerView.Adapter mAdapter = new MyAdapter(myDataset);
+        RecyclerView.Adapter mAdapter = new MyAdapter(this, myDataset);
         RecyclerView.Adapter pfAdapter = new PendingFriendAdapter(pendingFriendDataSet);
         friendsList.setAdapter(mAdapter);
         pendingFriendsList.setAdapter(pfAdapter);
