@@ -6,8 +6,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import java.util.Date;
 import java.util.HashMap;
@@ -339,6 +337,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        //TODO: #change where the message gets displayed
         EditText messageView = findViewById(R.id.text_message);
 
         Map<String, String> newMessage = new HashMap<>();
@@ -358,7 +357,7 @@ public class MainActivity extends AppCompatActivity {
         chat.addOrderedMessagesListener(
                 chatMessagesList -> {
                     Log.d(TAG, "msg list size:" + chatMessagesList.size());
-                    chatMessagesList.forEach(chatMessage -> {
+                    chatMessagesList.forEach(chatMessage -> { //#requires APK 24 to work.
                         chatView.append(chatMessage.toString());
                     });
                 });
