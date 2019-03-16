@@ -86,7 +86,7 @@ public class ViewFriendsActivity extends AppCompatActivity {
                             editor.apply();
                         }
                     }
-                    });
+                });
 
         friendsSet = pref.getStringSet("friendsArray", friendsSet);
         pendingFriendsSet = pref.getStringSet("pendingFriendsArray", pendingFriendsSet);
@@ -119,68 +119,54 @@ public class ViewFriendsActivity extends AppCompatActivity {
                     public void onClick(View v) {
                         enteredEmail = mEmail.getText().toString();
                         if(!enteredEmail.isEmpty()){
+
+                            // If the entered email is the user's email, prevent them from adding themselves
                             if(enteredEmail.equals(userDocString)){
                                 mEmail.setText("");
-                                //hideKeyboard();
                                 Toast.makeText(ViewFriendsActivity.this, "You can't add yourself as a friend!",
                                         Toast.LENGTH_LONG).show();
+                                dialog.dismiss();
+                            }
 
-                            }
+                            // If the entered email is already in the friendsSet, prevent them from adding that email
                             else if(pref.getStringSet("friendsArray", friendsSet) != null &&
-                                    pref.getStringSet("friendsArray", friendsSet).size() >= 0 ){
-                                if(pref.getStringSet("friendsArray", friendsSet).contains(enteredEmail))
-                                {
-                                    mEmail.setText("");
-                                    //hideKeyboard();
-                                    Toast.makeText(ViewFriendsActivity.this, "You already have this person \n" +
-                                                    "in your friends list!",
-                                            Toast.LENGTH_LONG).show();
-                                }
+                                    pref.getStringSet("friendsArray", friendsSet).size() >= 0 &&
+                                    pref.getStringSet("friendsArray", friendsSet).contains(enteredEmail)) {
+                                mEmail.setText("");
+                                Toast.makeText(ViewFriendsActivity.this, "You already have this person \n" +
+                                                "in your friends list!",
+                                        Toast.LENGTH_LONG).show();
+                                dialog.dismiss();
                             }
+
+                            // Add the new email to the pending friends list, assuming that they can be found in the system.
                             else {
-                                System.out.println("INSIDE THIS ELSE CASE NOW!!!!!!!!!!!!!!!!!!!!!");
                                 db.collection("users")
                                         .get()
                                         .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                             @Override
                                             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                                 if (task.isSuccessful()) {
-                                                    int num = 0;
+                                                    int num = task.getResult().size();
+
+                                                    // Iterate through every single user
                                                     for (QueryDocumentSnapshot document : task.getResult()) {
-                                                        num = task.getResult().size() - 1;
-                                                        if (num >= 0) {
+                                                        if (num > 0) {
                                                             if (document.getId().equals(enteredEmail)) {
-                                                                System.out.println("Friend exists in the DB!");
-                                                                //SharedPreferences.Editor editor = pref.edit();
                                                                 addCurrUserToFriendsPendingArr(userDocString, enteredEmail);
-
-                                                                //pendingFriendsArr.add(enteredEmail);
-                                                                //Set<String> tempFriendsSet = new HashSet<String>(friendsArr);
-
-                                                               // editor.putStringSet("friendsArray", tempFriendsSet);
-                                                               // editor.apply();
-                                                                System.out.println("yoooyoyoyoyoyoyoyoy" + friendsSet);
                                                                 dialog.dismiss();
-                                                               // hideKeyboard();
-
-
-
+                                                                break;
                                                             } else {
-                                                                if (num == 0) {
+                                                                if (num == 1) {
                                                                     mEmail.setText("");
-                                                                    //hideKeyboard();
-                                                                    Toast.makeText(ViewFriendsActivity.this, "Sorry your friend is \n" +
-                                                                            "not in our database!", Toast.LENGTH_LONG).show();
+                                                                    Toast.makeText(ViewFriendsActivity.this, "Sorry we couldn't \n" +
+                                                                            "find your friend!", Toast.LENGTH_LONG).show();
+                                                                    dialog.dismiss();
                                                                 }
-                                                                else{
-                                                                    System.out.println("else case......................................");
-                                                                }
-
                                                             }
                                                             num = num - 1;
                                                         }
                                                     }
-
 
                                                 } else {
                                                     Log.w(TAG, "Error getting documents.", task.getException());
@@ -190,16 +176,14 @@ public class ViewFriendsActivity extends AppCompatActivity {
 
                             }
                         }
-                        else{
-                            Toast.makeText(ViewFriendsActivity.this, "email field empty", Toast.LENGTH_LONG).show();
 
+                        // There is no email being entered
+                        else{
+                            Toast.makeText(ViewFriendsActivity.this, "Please enter an email!", Toast.LENGTH_LONG).show();
                         }
                     }
                 });
-
-
                 dialog.show();
-
             }
         });
 
@@ -217,7 +201,6 @@ public class ViewFriendsActivity extends AppCompatActivity {
         RecyclerView.Adapter pfAdapter = new PendingFriendAdapter(pendingFriendDataSet);
         friendsList.setAdapter(mAdapter);
         pendingFriendsList.setAdapter(pfAdapter);
-
     }
 
 
@@ -226,116 +209,116 @@ public class ViewFriendsActivity extends AppCompatActivity {
         db.collection("users").document(currUser)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
-                   // if(task.getResult() != null) {
-                        ArrayList<String> temp = (ArrayList<String>) task.getResult().get("pendingFriendsList");
-                        ArrayList<String> temp2 = (ArrayList<String>) task.getResult().get("friendsList");
 
-                        if(temp != null && temp.size() == 0){
-                            db.collection("users").document(friend)
-                                    .get()
-                                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                                               @Override
-                                                               public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                                                   if (task.isSuccessful()) {
-                                                                      // if (task.getResult() != null) {
-                                                                           ArrayList<String> temp = (ArrayList<String>) task.getResult().get("pendingFriendsList");
-                                                                           temp.add(currUser);
-                                                                           db.collection("users").document(friend).update("pendingFriendsList", temp)
-                                                                                   .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                       @Override
-                                                                                       public void onComplete(@NonNull Task<Void> task) {
-                                                                                           if (task.isSuccessful()) {
-                                                                                               Toast.makeText(ViewFriendsActivity.this, "Friend Request Sent!",
-                                                                                                       Toast.LENGTH_LONG).show();
-                                                                                           } else {
-                                                                                               Toast.makeText(ViewFriendsActivity.this, "Error Sending Friend Request, \n" +
-                                                                                                               "try again later!",
-                                                                                                       Toast.LENGTH_LONG).show();
-                                                                                           }
-                                                                                       }
-                                                                                   });
-                                                                      // }
-                                                                   }
-                                                               }
-                                                           });
+                    // Get the current pending friends list and the current friends list
+                    ArrayList<String> currPendingList = (ArrayList<String>) task.getResult().get("pendingFriendsList");
+                    ArrayList<String> currFriendsList = (ArrayList<String>) task.getResult().get("friendsList");
 
+                    // If the pending friends list does not contain the friend, send them a friend request
+                    if(currPendingList != null && !currPendingList.contains(friend)) {
 
+                        // Get the other user's friend list
+                        db.collection("users").document(friend)
+                            .get()
+                            .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
 
-                        }
+                            @Override
+                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
 
-                        if(temp != null && temp.size() > 0) {
-                            for (int i = 0; i <= temp.size() - 1; i++) {
-                                if (temp.get(i).equals(friend)) { //if the friend was already in currUser's pending list
-                                    SharedPreferences.Editor editor = pref.edit();
+                                // Get their current friends list and add the current user to it
+                                if (task.isSuccessful()) {
+                                    ArrayList<String> theirPendingFriendsList = (ArrayList<String>) task.getResult().get("pendingFriendsList");
+                                    theirPendingFriendsList.add(currUser);
 
-                                    friendsArr.add(enteredEmail);
-                                    Set<String> tempFriendsSet = new HashSet<String>(friendsArr);
-                                    editor.putStringSet("friendsArray", tempFriendsSet);
-                                    editor.apply();
+                                    // Update the other user's pending friends list
+                                    db.collection("users").document(friend).update("pendingFriendsList", theirPendingFriendsList)
+                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()) {
+                                                    Toast.makeText(ViewFriendsActivity.this, "You've sent " + friend + "\n" +
+                                                            "a friend request!", Toast.LENGTH_LONG).show();
 
-                                    //add the friend to current user's friendList
-                                    db.collection("users").document(currUser).update("friendsList", friendsArr);
-
-                                    //remove the current user from friend's pending list
-                                    temp.remove(i);
-                                    db.collection("users").document(currUser).update("pendingFriendsList", temp);
-
-                                    //add the current user to friend's friend list
-                                    temp2.add(friend);
-                                    db.collection("users").document(friend).update("friendsList", temp2);
-
-                                    Toast.makeText(ViewFriendsActivity.this, "Friend added successfully!", Toast.LENGTH_LONG).show();
-
-
-
+                                                } else {
+                                                    Toast.makeText(ViewFriendsActivity.this, "Error Sending Friend Request, \n" +
+                                                                    "try again later!",
+                                                            Toast.LENGTH_LONG).show();
+                                                }
+                                            }
+                                        });
                                 }
-                                /*else{
-                                    if(i == temp.size()-1){ //means that the friend hadn't added the current user before
-                                        temp.add(currUser);
-                                        db.collection("users").document(friend).update("pendingFriendsList", temp)
-                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                    @Override
-                                                    public void onComplete(@NonNull Task<Void> task) {
-                                                        if (task.isSuccessful()) {
-                                                            Toast.makeText(ViewFriendsActivity.this, "Friend Request Sent!",
-                                                                    Toast.LENGTH_LONG).show();
-                                                        } else {
-                                                            Toast.makeText(ViewFriendsActivity.this, "Error Sending Friend Request, \n" +
-                                                                            "try again later!",
-                                                                    Toast.LENGTH_LONG).show();
-                                                        }
-                                                    }
-                                                });
-                                    }
-                                }*/
                             }
-
-
-                        }
+                        });
                     }
-                    else{
+
+                    // If the friend is in your pending friends list, update both friend's lists
+                    else {
+
+                        // Remove the friend from your own pending list and add it to your friends list
+                        currFriendsList.add(friend);
+                        currPendingList.remove(friend);
+
+                        db.collection("users").document(currUser).update("friendsList", currFriendsList);
+                        db.collection("users").document(currUser).update("pendingFriendsList", currPendingList);
+                        db.collection("users").document(friend)
+                            .get()
+                            .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+
+                                @Override
+                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                    if (task.isSuccessful()) {
+
+                                        // Get the current pending friends list and the current friends list
+                                        ArrayList<String> theirPendingList = (ArrayList<String>) task.getResult().get("pendingFriendsList");
+                                        ArrayList<String> theirFriendsList = (ArrayList<String>) task.getResult().get("friendsList");
+
+                                        if (theirPendingList.contains(currUser)) {
+                                            theirPendingList.remove(currUser);
+                                        }
+                                        if (!theirFriendsList.contains(currUser)) {
+                                            theirFriendsList.add(currUser);
+                                        }
+
+                                        db.collection("users").document(friend).update("friendsList", theirFriendsList);
+                                        db.collection("users").document(friend).update("pendingFriendsList", theirPendingList);
+                                    }
+                                    Toast.makeText(ViewFriendsActivity.this, "Friend added successfully!", Toast.LENGTH_LONG).show();
+                                }
+                            });
+                    }
+
+                        // Remove yourself from their pending friends list and update their friends list
+
+                        // Add the friend
+
+                        //for (int i = 0; i < currPendingList.size(); i++) {
+                        //    if (currPendingList.get(i).equals(friend)) {
+                        //SharedPreferences.Editor editor = pref.edit();
+
+                        //friendsArr.add(enteredEmail);
+                       // Set<String> tempFriendsSet = new HashSet<String>(friendsArr);
+                        //editor.putStringSet("friendsArray", tempFriendsSet);
+                      //  editor.apply();
+
+                        //Add the friend to current user's friendList
+
+                        //Remove the current user from friend's pending list
+
+
+                        //Add the current user to friend's friend list
+                          //  }
+                        //}
+                    //}
+                } else{
                     Log.w(TAG, "Error getting documents.", task.getException());
-                    System.out.println("ERROR GETTING STUFFFFFFFFFFFFFFFFFFFFFFFFFFF");
                 }
 
-                }
-                /*else{
-                    Log.w(TAG, "Error getting documents.", task.getException());
-                }*/
-           // }
+            }
         });
-    }
-
-
-    private void hideKeyboard(){
-        View view = this.getCurrentFocus();
-        if(view != null){
-            InputMethodManager inputM = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-            inputM.hideSoftInputFromWindow(view.getWindowToken(), 0);
-        }
     }
 }
 
