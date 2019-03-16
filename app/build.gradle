@@ -3,7 +3,7 @@ apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdkVersion 27
-    testOptions.unitTests.includeAndroidResources = true
+
 
     defaultConfig {
         applicationId "edu.ucsd.cse110.mainpage"
@@ -36,6 +36,13 @@ android {
     testOptions {
         unitTests.returnDefaultValues = true
     }
+
+
+}
+
+repositories {
+    maven { url "https://jitpack.io" }
+
 }
 
 dependencies {

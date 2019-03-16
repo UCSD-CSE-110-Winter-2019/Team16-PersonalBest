@@ -1,9 +1,15 @@
 package edu.ucsd.cse110.mainpage;
 import edu.ucsd.cse110.mainpage.classes.StepCounter;
 import org.junit.Test;
+<<<<<<< HEAD
 
         import static org.junit.Assert.*;
 
+=======
+import org.robolectric.annotation.Config;
+
+import static org.junit.Assert.*;
+>>>>>>> unitTests
 public class stepCounterUnitTest {
     public StepCounter stepcounter = new StepCounter();
 
