@@ -6,7 +6,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import org.w3c.dom.Text;
 
 import edu.ucsd.cse110.mainpage.R;
 import edu.ucsd.cse110.mainpage.ViewFriendsActivity;
@@ -20,10 +23,10 @@ public class PendingFriendAdapter extends RecyclerView.Adapter<PendingFriendAdap
         // you provide access to all the views for a data item in a view holder
         public static class MyViewHolder extends RecyclerView.ViewHolder {
             // each data item is just a string in this case
-            public Button button;
-            public MyViewHolder(Button v) {
+            public TextView tv;
+            public MyViewHolder(TextView v) {
                 super(v);
-                button = v;
+                tv = v;
             }
 
         }
@@ -37,9 +40,9 @@ public class PendingFriendAdapter extends RecyclerView.Adapter<PendingFriendAdap
         @Override
         public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             // create a new view
-            Button v = (Button) LayoutInflater.from(parent.getContext())
+            TextView viewT = (TextView) LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.activity_pending_friend_view, parent, false);
-           MyViewHolder vh = new MyViewHolder(v);
+           MyViewHolder vh = new MyViewHolder(viewT);
             return vh;
         }
 
@@ -48,7 +51,7 @@ public class PendingFriendAdapter extends RecyclerView.Adapter<PendingFriendAdap
         public void onBindViewHolder(MyViewHolder holder, int position) {
             // - get element from your dataset at this position
             // - replace the contents of the view with that element
-            holder.button.setText(pFDataset[position]);
+            holder.tv.setText("from " + pFDataset[position]);
 
         }
 

@@ -14,7 +14,10 @@ public class StepCounter {
     }
 
     public long getSteps(long endSteps) {
-        return endSteps - this.currentsteps;
+        if(this.currentsteps<=endSteps)
+            return endSteps - this.currentsteps;
+        else
+            return 0;
     }
 
 }

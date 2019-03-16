@@ -243,6 +243,18 @@ public class ViewFriendsActivity extends AppCompatActivity {
                                                     Toast.makeText(ViewFriendsActivity.this, "You've sent " + friend + "\n" +
                                                             "a friend request!", Toast.LENGTH_LONG).show();
 
+                                                    SharedPreferences.Editor editor = pref.edit();
+
+                                                friendsArr.add(enteredEmail);
+                                                pendingFriendsArr.remove(enteredEmail);
+                                                Set<String> tempFriendsSet = new HashSet<String>(friendsArr);
+                                                editor.putStringSet("friendsArray", tempFriendsSet);
+
+                                                Set<String> tempPendingSet = new HashSet<String>(pendingFriendsArr);
+                                                editor.putStringSet("pendingFriendsArray", tempPendingSet);
+                                                editor.apply();
+
+
                                                 } else {
                                                     Toast.makeText(ViewFriendsActivity.this, "Error Sending Friend Request, \n" +
                                                                     "try again later!",
