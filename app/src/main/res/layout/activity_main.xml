@@ -119,6 +119,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:id="@+id/goalLayout"
         android:orientation="horizontal">
 
         <Button
@@ -134,6 +135,7 @@
             android:inputType = "number"
             android:text="0"
             />
+    </LinearLayout>
 
         <Button
             android:id="@+id/viewFriendsBtn"
@@ -141,10 +143,40 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="100dp"
             android:text="View Friends" />
+    <ScrollView
+        android:id="@+id/scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/text_message"
+        android:layout_below="@+id/goalLayout"
+        android:background="#ECEFF1"
+        android:fillViewport="true"
+        android:overScrollMode="always">
 
+        <TextView
+            android:id="@+id/chat"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="message will appear here"
+            android:padding="10dp"
+            android:scrollbars="vertical" />
+    </ScrollView>
 
-    </LinearLayout>
+    <EditText
+        android:id="@+id/text_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/btn_send"
+        android:layout_margin="5dp"
+        android:hint="message" />
 
+    <Button
+        android:id="@+id/btn_send"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="5dp"
+        android:text="send" />
 
 
     <android.support.design.widget.BottomNavigationView
