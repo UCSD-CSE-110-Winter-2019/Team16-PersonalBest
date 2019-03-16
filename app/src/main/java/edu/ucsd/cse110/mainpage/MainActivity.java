@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String CHAT_MESSAGE_SERVICE_EXTRA = "CHAT_MESSAGE_SERVICE";
     public static final String NOTIFICATION_SERVICE_EXTRA = "NOTIFICATION_SERVICE";
 
-    private static final String TAG = "MainActivity";//TODO: #private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String TAG = "MainActivity";//TODO: #consider changing to private static final String TAG = MainActivity.class.getSimpleName();
 	
 	String DOCUMENT_KEY = "chat1";
     String TEXT_KEY = "text";
@@ -114,16 +114,16 @@ public class MainActivity extends AppCompatActivity {
        // userSharedPref.edit().clear().commit();
         height = userSharedPref.getInt("height",-1);
         stepsCount = userSharedPref.getLong("steps", 0);
-		from = userSharedPref.getString("name", null);
+		from = userSharedPref.getString("userIDinDB", null);//#changed name to userIDinDB
 
 		String stringExtra = getIntent().getStringExtra(CHAT_MESSAGE_SERVICE_EXTRA);
         chat = ChatMessageServiceFactory.getInstance().getOrDefault(stringExtra, FirebaseFirestoreAdapter::getInstance);
 
 		initMessageUpdateListener();
 
-		//# need to create some sort of message send button
-		//findViewById(R.id.btn_send).setOnClickListener(view -> sendMessage());
-        //subscribeToNotificationsTopic();
+		//TODO:# need to create some sort of message send button
+		findViewById(R.id.btn_send).setOnClickListener(view -> sendMessage());
+        subscribeToNotificationsTopic();
 
         // Create a timer and a stepper to time and count steps for a walk
         timer = new TimeCalculator();
@@ -334,14 +334,15 @@ public class MainActivity extends AppCompatActivity {
 	private void sendMessage() {
         if (from == null || from.isEmpty()) {
             Toast.makeText(this, "Enter your name", Toast.LENGTH_SHORT).show();
-            return;
+            //return;
+            from = "Anything";
         }
 
         //TODO: #change where the message gets displayed
         EditText messageView = findViewById(R.id.text_message);
 
         Map<String, String> newMessage = new HashMap<>();
-        newMessage.put("name", from);
+        newMessage.put("userIDinDB", from);//#changed name to userIDinDB
         newMessage.put(TIMESTAMP_KEY, String.valueOf(new Date().getTime()));
         newMessage.put(TEXT_KEY, messageView.getText().toString());
 
