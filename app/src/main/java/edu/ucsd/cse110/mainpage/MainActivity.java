@@ -59,11 +59,9 @@ public class MainActivity extends AppCompatActivity {
     public static final String CHAT_MESSAGE_SERVICE_EXTRA = "CHAT_MESSAGE_SERVICE";
     public static final String NOTIFICATION_SERVICE_EXTRA = "NOTIFICATION_SERVICE";
 
-    private static final String TAG = "MainActivity";
-	#private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String TAG = "MainActivity";//TODO: #private static final String TAG = MainActivity.class.getSimpleName();
 	
 	String DOCUMENT_KEY = "chat1";
-    String FROM_KEY = "from";
     String TEXT_KEY = "text";
     String TIMESTAMP_KEY = "timestamp";
 	
@@ -118,34 +116,16 @@ public class MainActivity extends AppCompatActivity {
        // userSharedPref.edit().clear().commit();
         height = userSharedPref.getInt("height",-1);
         stepsCount = userSharedPref.getLong("steps", 0);
-		from = sharedpreferences.getString(FROM_KEY, null);
+		from = userSharedPref.getString("name", null);
 
 		String stringExtra = getIntent().getStringExtra(CHAT_MESSAGE_SERVICE_EXTRA);
         chat = ChatMessageServiceFactory.getInstance().getOrDefault(stringExtra, FirebaseFirestoreAdapter::getInstance);
 
 		initMessageUpdateListener();
-		
-		findViewById(R.id.btn_send).setOnClickListener(view -> sendMessage());
-        subscribeToNotificationsTopic();
-		
-		//need to add an equivalent name change option somehow.
-		#EditText nameView = findViewById((R.id.user_name));
-		#nameView.setText(from);
-		#nameView.addTextChangedListener(new TextWatcher() {
-        #    @Override
-        #    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-        #    }
-		#
-        #    @Override
-        #    public void onTextChanged(CharSequence s, int start, int before, int count) {
-        #        from = s.toString();
-        #        sharedpreferences.edit().putString(FROM_KEY, from).apply();
-        #    }
-		#
-        #    @Override
-        #    public void afterTextChanged(Editable s) {
-        #    }
-        #});
+
+		//# need to create some sort of message send button
+		//findViewById(R.id.btn_send).setOnClickListener(view -> sendMessage());
+        //subscribeToNotificationsTopic();
 
         // Create a timer and a stepper to time and count steps for a walk
         timer = new TimeCalculator();
@@ -224,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
                     walkSpeed = SpeedCalculator.walkingSpeed(walkDistance, walkTime);
 
                     // Provide the user information about the walk
-                    toaster("You walked for " + walkStepsCount + " steps over " + walkTime / 1000
+                    toaster("You walked for " + walkStepsCount + " steps over " + (walkTime / 1000)
                             + " seconds!");
                     setSpeedTextView(walkSpeed);
                     setDistanceTextView(walkDistance);
@@ -362,7 +342,7 @@ public class MainActivity extends AppCompatActivity {
         EditText messageView = findViewById(R.id.text_message);
 
         Map<String, String> newMessage = new HashMap<>();
-        newMessage.put(FROM_KEY, from);
+        newMessage.put("name", from);
         newMessage.put(TIMESTAMP_KEY, String.valueOf(new Date().getTime()));
         newMessage.put(TEXT_KEY, messageView.getText().toString());
 
@@ -374,7 +354,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initMessageUpdateListener() {
-        TextView chatView = findViewById(R.id.chat);
+        TextView chatView = findViewById(R.id.chat);//TODO: #change location
         chat.addOrderedMessagesListener(
                 chatMessagesList -> {
                     Log.d(TAG, "msg list size:" + chatMessagesList.size());

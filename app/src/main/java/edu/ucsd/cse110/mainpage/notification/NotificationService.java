@@ -1,4 +1,4 @@
-package edu.ucsd.cse110.firebaselab.notification;
+package edu.ucsd.cse110.mainpage.notification;
 
 import com.google.android.gms.tasks.Task;
 

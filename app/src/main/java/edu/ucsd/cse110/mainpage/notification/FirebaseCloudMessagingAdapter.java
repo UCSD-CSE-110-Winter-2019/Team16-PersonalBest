@@ -1,11 +1,11 @@
-package edu.ucsd.cse110.firebaselab.notification;
+package edu.ucsd.cse110.mainpage.notification;
 
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.function.Consumer;
 
-import edu.ucsd.cse110.firebaselab.chatmessage.FirebaseFirestoreAdapter;
+import edu.ucsd.cse110.mainpage.chatmessage.FirebaseFirestoreAdapter;
 
 public class FirebaseCloudMessagingAdapter implements NotificationService {
     private final String TAG = FirebaseFirestoreAdapter.class.getSimpleName();
