@@ -1,10 +1,12 @@
 package edu.ucsd.cse110.mainpage;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
@@ -13,6 +15,26 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+import android.content.Intent;
 
 import edu.ucsd.cse110.mainpage.fitness.FitnessService;
 import edu.ucsd.cse110.mainpage.fitness.FitnessServiceFactory;
@@ -30,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView textSteps;
     private TextView speedTView;
     private TextView distance;
-    private long stepsCount;
+    public long stepsCount;
     private long walkStepsCount;
     private long walkTime;
     private float walkSpeed;
@@ -39,6 +61,17 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences userSharedPref;
     private long currGoalNum = 0;
     public EditText currentGoal;
+    String userDocString;
+    boolean userInDBBool = false;
+    FirebaseFirestore db;
+    ArrayList<String> regSteps;
+    ArrayList<String> walkedSteps;
+    Intent chartsIntent;
+    long walkCurrentStepsCount;
+    int onlyShowGoalAlertOnceCounter=0;
+    String userEmail;
+    SharedPreferences.Editor editPref;
+
 
     // Google Fit Set up
     public static final String FITNESS_SERVICE_KEY = "FITNESS_SERVICE_KEY";
@@ -87,13 +120,17 @@ public class MainActivity extends AppCompatActivity {
 
         // Keep track of user preferences
         userSharedPref = getSharedPreferences("userdata", MODE_PRIVATE);
+
+
+        userDocString = userSharedPref.getString("userIDinDB", "");
+
+
         currGoalNum = userSharedPref.getLong("stepGoal", 0);
         currentGoal.setText(""+currGoalNum);
-        // Keep track of user preferences
-        userSharedPref = getSharedPreferences("userdata", MODE_PRIVATE);
-       // userSharedPref.edit().clear().commit();
+
         height = userSharedPref.getInt("height",-1);
         stepsCount = userSharedPref.getLong("steps", 0);
+        walkStepsCount = userSharedPref.getLong("walkedSteps", 0);
 
         // Create a timer and a stepper to time and count steps for a walk
         timer = new TimeCalculator();
@@ -119,6 +156,9 @@ public class MainActivity extends AppCompatActivity {
 
         fitnessService = FitnessServiceFactory.create(fitnessServiceKey, this);
         fitnessService.setup();
+
+
+
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
@@ -150,6 +190,7 @@ public class MainActivity extends AppCompatActivity {
                 if(walk_button.getText()== getString(R.string.start_button))
                 {
                     // Start keeping track of the walk
+                    walkCurrentStepsCount = 0;
                     timer.startTimer();
                     stepper.startSteps(stepsCount);
 
@@ -166,13 +207,15 @@ public class MainActivity extends AppCompatActivity {
                 {
                     // Find steps distance, speed, and time for the walk
                     fitnessService.updateStepCount();
-                    walkStepsCount = stepper.getSteps(stepsCount);
-                    walkDistance = DistanceCalculator.stepsToDistance(walkStepsCount, height);
+                    walkCurrentStepsCount =  stepper.getSteps(stepsCount);
+                    walkStepsCount = walkStepsCount + walkCurrentStepsCount;
+                    fetchWalkedStepsArray();
+                    walkDistance = DistanceCalculator.stepsToDistance(walkCurrentStepsCount, height);
                     walkTime = timer.getWalkTime();
                     walkSpeed = SpeedCalculator.walkingSpeed(walkDistance, walkTime);
 
                     // Provide the user information about the walk
-                    toaster("You walked for " + walkStepsCount + " steps over " + walkTime / 1000
+                    toaster("You walked for " + walkCurrentStepsCount + " steps over " + walkTime / 1000
                             + " seconds!");
                     setSpeedTextView(walkSpeed);
                     setDistanceTextView(walkDistance);
@@ -188,43 +231,277 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+        Button addfriendsBtn = (Button)findViewById(R.id.viewFriendsBtn);
+        addfriendsBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                goToViewFriendsPage();
+            }
+        });
+
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+        GoogleSignInClient mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+        startActivityForResult(signInIntent, 134);
+
         UpdateStepsAsyncTask task = new UpdateStepsAsyncTask(fitnessService);
         task.execute();
         fitnessService.updateStepCount();
-    }
 
+
+
+
+
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         // close if the height is not set
         int height = userSharedPref.getInt("height",-1);
-
         if (height == -1) {
             finish();
         }
 
+        Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+
+        try {
+            userDocString = task.getResult().getEmail();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+
+
         if (resultCode == RESULT_OK) {
+            SharedPreferences.Editor editor = userSharedPref.edit();
+            editor.putString("userIDinDB", userDocString).apply();
+
 
             if (requestCode == fitnessService.getRequestCode()) {
+
                 fitnessService.updateStepCount();
                 DistanceCalculator.stepsToDistance(stepsCount, height);
+
             }
+            addNewUser();
         } else {
             Log.e(TAG, "ERROR, google fit result code: " + resultCode);
         }
     }
 
+    public void addNewUser(){
+        //code for adding a new user to the database and for checking if the user already exists in
+        //the database, then not add that user to the database.
+        //userDocString = userSharedPref.getString("userIDinDB", "");
+        if(userDocString.equals("")){
+            System.out.println("userDocString is null....................................");
+        }
+        else {
+            db = FirebaseFirestore.getInstance();
+            db.collection("users")
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                if (!task.getResult().isEmpty()) {
+                                    int numOfDocs = task.getResult().size();
+                                    for (QueryDocumentSnapshot document : task.getResult()) {
+                                        Log.d(TAG, document.getId() + " => " + document.getData());
+                                        numOfDocs = numOfDocs - 1;
+                                        if (document.getId().equals(userDocString)) {
+                                            userInDBBool = true;
+                                            System.out.println("checkuserindatabase if case................................");
+                                            return;
+                                        } else {
+                                            if (numOfDocs == 0) {
+                                                stepsCount = 0;
+                                                editPref = userSharedPref.edit();
+                                                editPref.putLong("steps", 0);
+                                                editPref.putLong("walkedSteps", 0);
+                                                editPref.apply();
+                                                // Create a new user with a first and last name
+                                                Map<String, Object> user = new HashMap<>();
+                                                ArrayList<String> regStepsDataArr = new ArrayList<String>();
+                                                regStepsDataArr.add(0, ""+stepsCount);
+                                                ArrayList<String> walkedStepsDataArr = new ArrayList<String>();
+                                                walkedStepsDataArr.add(0, "" + walkStepsCount);
+
+                                                ArrayList<String> friendsList = new ArrayList<String>();
+                                                ArrayList<String> pendingFriendsList = new ArrayList<String>();
+                                                user.put("regularStepsData", regStepsDataArr);
+                                                user.put("walkedStepsData", walkedStepsDataArr);
+                                                user.put("friendsList", friendsList);
+                                                user.put("pendingFriendsList", pendingFriendsList);
+
+                                                System.out.println("userDocString is elseif case...................................." + userDocString);
+
+                                                // Add a new document with a generated ID
+                                                db.collection("users")
+                                                        .document(userDocString).set(user)
+                                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                            @Override
+                                                            public void onSuccess(Void v) {
+
+                                                            }
+                                                        })
+                                                        .addOnFailureListener(new OnFailureListener() {
+                                                            @Override
+                                                            public void onFailure(@NonNull Exception e) {
+                                                                Log.w(TAG, "Error adding document", e);
+                                                            }
+                                                        });
+                                            }
+                                        }
+
+                                    }
+                                }
+                            } else {
+                                Log.w(TAG, "Error getting documents.", task.getException());
+                            }
+                        }
+                    });
+        }//end of add user to DB code
+
+    }
+
+
     /**
      * Set the number of steps
      */
 
+
+
     public void setStepCount(long stepCount) {
         textSteps.setText(String.valueOf(stepCount) + " Steps");
-        this.stepsCount = stepCount;
         SharedPreferences.Editor editor = userSharedPref.edit();
+        if(stepsCount >= userSharedPref.getLong("stepGoal", 0) && onlyShowGoalAlertOnceCounter == 0){
+            onlyShowGoalAlertOnceCounter++;
+            updateGoal();
+        }
+        //System.out.println("INSIDE STEP COUNT FUNCTION..............................");
+        this.stepsCount = stepCount;
+
+        if(this.stepsCount == 0 && walkStepsCount != 0 && (userSharedPref.getLong("steps", 0) != 0)){
+            System.out.println("ADD AN ARRAY ELEMENT IN FIREBASE..............................");
+            walkStepsCount = 0;//update that to zero to reflect a new day
+            regSteps.add(regSteps.size()-1, ""+0);
+            walkedSteps.add(walkedSteps.size()-1, ""+0);
+            updateRegStepsInDB(regSteps);
+            updateWalkedStepsInDB(walkedSteps);
+        }
+        else if(userSharedPref.getLong("steps", 0) == this.stepsCount){
+            System.out.println("DON'T ADD AN ARRAY ELEMENT IN FIREBASE, no update required.....");
+            System.out.println(this.stepsCount + "," + userSharedPref.getLong("steps", 0));
+
+        }
+        else if(userSharedPref.getLong("steps", 0) < this.stepsCount) {
+            System.out.println("UPDATE STEPCOUNT IN FIREBASE..............................");
+            fetchRegStepsArray();
+            fetchWalkedStepsArray();
+            //System.out.println("REG STEPS ARRAY IS.............................." + regSteps);
+
+        }
+
         editor.putLong("steps", stepCount);
+        editor.putLong("walkedSteps", walkStepsCount);
         editor.apply();
+    }
+
+    public void goToViewFriendsPage(){
+        Intent intent = new Intent(this, ViewFriendsActivity.class);
+        startActivity(intent);
+    }
+
+    public void updateRegStepsInDB(ArrayList<String> regSteps){
+        DocumentReference user = db.collection("users").document(userDocString);
+        user.update("regularStepsData", regSteps);
+        System.out.println("regSteps in update method are!!!!!!!!!!!!!!!" + regSteps);
+
+    }
+
+    public void updateWalkedStepsInDB(ArrayList<String> walkedSteps){
+        DocumentReference user = db.collection("users").document(userDocString);
+        user.update("walkedStepsData", walkedSteps);
+        System.out.println("walkedSteps in update method are!!!!!!!!!!!!!!!" + walkedSteps);
+    }
+
+    //get the current steps arrays from the DB
+    public void fetchRegStepsArray(){
+        //hardcoded step values for Monday to Saturday since I didn't have access to an android phone then.
+        db = FirebaseFirestore.getInstance();
+        userDocString = userSharedPref.getString("userIDinDB", "");
+
+        if(!userDocString.equals("")) {
+            DocumentReference user = db.collection("users").document(userDocString);
+
+            user.get()
+                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if (task.isSuccessful()) {
+
+                                regSteps = (ArrayList<String>) task.getResult().get("regularStepsData");
+                                //System.out.println("regSteps.................." + regSteps);
+                                int index = regSteps.size() - 1;
+                                if(index >= 0) {
+
+                                    regSteps.set(index, "" + stepsCount);
+                                    updateRegStepsInDB(regSteps);
+                                }
+
+
+                            } else {
+                                Log.w(TAG, "Error getting documents.", task.getException());
+
+                            }
+                        }
+                    });
+
+        }
+
+    }
+
+    public void fetchWalkedStepsArray(){
+        //hardcoded step values for Monday to Saturday since I didn't have access to an android phone then.
+        db = FirebaseFirestore.getInstance();
+        userDocString = userSharedPref.getString("userIDinDB", "");
+
+        if(!userDocString.equals("")) {
+            DocumentReference user = db.collection("users").document(userDocString);
+
+            user.get()
+                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if (task.isSuccessful()) {
+
+                                walkedSteps = (ArrayList<String>) task.getResult().get("walkedStepsData");
+
+                               // System.out.println("walkedSteps.................." + walkedSteps);
+
+                                int index = walkedSteps.size()-1;
+                                if(index >= 0) {
+                                    walkedSteps.set(index, "" + walkStepsCount);
+                                    updateWalkedStepsInDB(walkedSteps);
+                                }
+
+
+                            } else {
+                                Log.w(TAG, "Error getting documents.", task.getException());
+
+                            }
+                        }
+                    });
+
+        }
+
     }
 
     /**
@@ -266,11 +543,13 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Switches to the charts view
      */
-    public void goToChartsPage(){
-        Intent intent = new Intent(this, StepsChart.class);
-        intent.putExtra("mySteps", stepsCount);
-        intent.putExtra("goal", currGoalNum);
-        startActivity(intent);
+    public void goToChartsPage() {
+        chartsIntent = new Intent(this, StepsChart.class);
+            chartsIntent.putExtra("mySteps", stepsCount);
+            chartsIntent.putExtra("walkedSteps", walkStepsCount);
+            chartsIntent.putExtra("goal", currGoalNum);
+            startActivity(chartsIntent);
+
     }
 
     /**
@@ -300,5 +579,40 @@ public class MainActivity extends AppCompatActivity {
 
         toast.show();
     }
+
+    public void updateGoal(){
+        if(stepsCount >= userSharedPref.getLong("stepGoal", 0)){
+            AlertDialog.Builder updateGoalDialog = new AlertDialog.Builder(this);
+            updateGoalDialog.setMessage("Congrats on reaching your goal!!\nWould you like to update your\n" +
+                    "goal to " + String.valueOf(currGoalNum+500) + "?")
+                    .setCancelable(false)
+                    .setPositiveButton("Yes!", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            currGoalNum = currGoalNum + 500;
+                            //updating the currentGoal
+                            SharedPreferences.Editor editor = userSharedPref.edit();
+                            editor.putLong("stepGoal", currGoalNum).apply();
+                            currentGoal.setText("" + currGoalNum);
+                            dialog.dismiss();
+                            onlyShowGoalAlertOnceCounter = 0;
+
+                        }
+                    }).setNegativeButton("No", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                }
+            });
+
+
+            AlertDialog alert = updateGoalDialog.create();
+            alert.setTitle("Update Goal!");
+            alert.show();
+
+
+        }
+    }
+
 }
 

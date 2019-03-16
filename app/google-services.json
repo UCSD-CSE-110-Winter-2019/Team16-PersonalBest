@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "1051489475776",
+    "firebase_url": "https://woven-gist-232022.firebaseio.com",
+    "project_id": "woven-gist-232022",
+    "storage_bucket": "woven-gist-232022.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1051489475776:android:81d14b105b36346c",
+        "android_client_info": {
+          "package_name": "edu.ucsd.cse110.mainpage"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1051489475776-01cqsqvifcoj6hclq95kdn68ag2ui1k0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "edu.ucsd.cse110.mainpage",
+            "certificate_hash": "14b797242ec6b05fc26de6610ead04fc92b44f90"
+          }
+        },
+        {
+          "client_id": "1051489475776-85ufpslb5q3ba3df1oj522eo3tr7vb3i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDDSqy2r9Id3qlbcsNUaVOtM9rvMAEX-XU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1051489475776-85ufpslb5q3ba3df1oj522eo3tr7vb3i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

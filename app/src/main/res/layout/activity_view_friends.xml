@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".ViewFriendsActivity">
+
+    <Button
+        android:id="@+id/addFriendBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="300dp"
+        android:layout_marginTop="30dp"
+        android:text="+"
+        tools:layout_editor_absoluteX="288dp"
+        tools:layout_editor_absoluteY="27dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_margin="20dp"
+        android:text="Your Friends:"
+        android:textSize="20dp"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/friendsList"
+        android:layout_width="match_parent"
+        android:layout_height="260dp"
+        android:scrollbars="vertical" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Pending Friend Requests:"
+        android:textSize="20dp"
+        android:layout_margin="20dp"
+        android:layout_marginLeft="10dp"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/pendingFriendsList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical"/>
+
+
+</LinearLayout>
