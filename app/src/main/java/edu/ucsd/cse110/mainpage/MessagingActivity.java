@@ -29,7 +29,6 @@ import edu.ucsd.cse110.mainpage.notification.NotificationServiceFactory;
 
 public class MessagingActivity extends AppCompatActivity {
 
-    String DOCUMENT_KEY = "chat1";
     String TEXT_KEY = "text";
     String TIMESTAMP_KEY = "timestamp";
     String FROM_KEY = "from";
@@ -42,7 +41,6 @@ public class MessagingActivity extends AppCompatActivity {
 
     private static final String COLLECTION_KEY = "chats";
     public static final String CHAT_MESSAGE_SERVICE_EXTRA = "CHAT_MESSAGE_SERVICE";
-    public static final String NOTIFICATION_SERVICE_EXTRA = "NOTIFICATION_SERVICE";
     private static final String TAG = "MainActivity";//TODO: #consider changing to private static final String TAG = MainActivity.class.getSimpleName();
 
 
@@ -82,7 +80,6 @@ public class MessagingActivity extends AppCompatActivity {
 
         //TODO:# need to create some sort of message send button
         findViewById(R.id.btn_send).setOnClickListener(view -> sendMessage());
-        subscribeToNotificationsTopic();
     }
 
     private void sendMessage() {
@@ -120,20 +117,5 @@ public class MessagingActivity extends AppCompatActivity {
                         chatView.append(chatMessage.toString());
                     });
                 });
-    }
-
-    private void subscribeToNotificationsTopic() {
-        NotificationServiceFactory notificationServiceFactory = NotificationServiceFactory.getInstance();
-        String notificationServiceKey = getIntent().getStringExtra(NOTIFICATION_SERVICE_EXTRA);
-        NotificationService notificationService = notificationServiceFactory.getOrDefault(notificationServiceKey, FirebaseCloudMessagingAdapter::getInstance);
-
-        notificationService.subscribeToNotificationsTopic(DOCUMENT_KEY, task -> {
-            String msg = "Subscribed to notifications";
-            if (!task.isSuccessful()) {
-                msg = "Subscribe to notifications failed";
-            }
-            Log.d(TAG, msg);
-            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-        });
     }
 }

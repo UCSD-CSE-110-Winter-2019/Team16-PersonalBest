@@ -82,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
     String userEmail;
     SharedPreferences.Editor editPref;
 
+    public static final String NOTIFICATION_SERVICE_EXTRA = "NOTIFICATION_SERVICE";
     private static final String TAG = "MainActivity";//TODO: #consider changing to private static final String TAG = MainActivity.class.getSimpleName();
 
     // Google Fit Set up
@@ -259,6 +260,7 @@ public class MainActivity extends AppCompatActivity {
         UpdateStepsAsyncTask task = new UpdateStepsAsyncTask(fitnessService);
         task.execute();
         fitnessService.updateStepCount();
+        subscribeToNotificationsTopic();
     }
 
     @Override
@@ -616,6 +618,21 @@ public class MainActivity extends AppCompatActivity {
 
 
         }
+    }
+
+    private void subscribeToNotificationsTopic() {
+        NotificationServiceFactory notificationServiceFactory = NotificationServiceFactory.getInstance();
+        String notificationServiceKey = getIntent().getStringExtra(NOTIFICATION_SERVICE_EXTRA);
+        NotificationService notificationService = notificationServiceFactory.getOrDefault(notificationServiceKey, FirebaseCloudMessagingAdapter::getInstance);
+
+        notificationService.subscribeToNotificationsTopic("chats", task -> {
+            String msg = "Subscribed to notifications";
+            if (!task.isSuccessful()) {
+                msg = "Subscribe to notifications failed";
+            }
+            Log.d(TAG, msg);
+            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+        });
     }
 }
 
