@@ -99,6 +99,18 @@ public class StepsChart extends AppCompatActivity {
 
                                 regSteps = (List<String>) task.getResult().get("regularStepsData");
                                 walkedSteps = (List<String>) task.getResult().get("walkedStepsData");
+
+                                if(regSteps.size() < 8){
+                                    for(int i = 0; i<regSteps.size()-1; i++){ //don't edit the last index, that is the latest index
+                                        regSteps.add("0");
+                                    }
+                                }
+                                if(walkedSteps.size() < 8){
+                                    for(int i = 0; i<walkedSteps.size()-1; i++){ //don't edit the last index, that is the latest index
+                                        walkedSteps.add("0");
+                                    }
+                                }
+
                                 System.out.println("walkedSteps.................." + walkedSteps);
 
                                 //flip the arrays so it's easier to select 7 elements to display in
