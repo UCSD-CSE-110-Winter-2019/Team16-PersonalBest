@@ -21,6 +21,12 @@ android {
     lintOptions {
         warning 'InvalidPackage'
     }
+    android {
+        // ...
+        testOptions {
+            unitTests.returnDefaultValues = true
+        }
+    }
 }
 
 repositories {
