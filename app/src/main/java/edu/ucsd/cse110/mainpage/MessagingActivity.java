@@ -1,5 +1,6 @@
 package edu.ucsd.cse110.mainpage;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -11,6 +12,9 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -28,11 +32,14 @@ public class MessagingActivity extends AppCompatActivity {
     String DOCUMENT_KEY = "chat1";
     String TEXT_KEY = "text";
     String TIMESTAMP_KEY = "timestamp";
+    String FROM_KEY = "from";
     SharedPreferences userSharedPref;
 
     ChatMessageService chat;
-    String from;
+    String meUser;
+    String otherUser;
 
+    private static final String COLLECTION_KEY = "chats";
     public static final String CHAT_MESSAGE_SERVICE_EXTRA = "CHAT_MESSAGE_SERVICE";
     public static final String NOTIFICATION_SERVICE_EXTRA = "NOTIFICATION_SERVICE";
     private static final String TAG = "MainActivity";//TODO: #consider changing to private static final String TAG = MainActivity.class.getSimpleName();
@@ -46,11 +53,23 @@ public class MessagingActivity extends AppCompatActivity {
         // Keep track of user preferences
         userSharedPref = getSharedPreferences("userdata", MODE_PRIVATE);
 
-        from = userSharedPref.getString("userIDinDB", null);//#changed name to userIDinDB
+        meUser = userSharedPref.getString("userIDinDB", null);//#changed name to userIDinDB
 
-        String stringExtra = getIntent().getStringExtra(CHAT_MESSAGE_SERVICE_EXTRA);
-        chat = ChatMessageServiceFactory.getInstance().getOrDefault(stringExtra, FirebaseFirestoreAdapter::getInstance);
+        Intent intent= getIntent();
+        Bundle bundle = intent.getExtras();
 
+        if(bundle!=null)
+        {
+            otherUser = (String)bundle.getString("userEmail");
+        }
+
+        CollectionReference collection = FirebaseFirestore.getInstance()
+                .collection(COLLECTION_KEY)
+                .document(meUser)
+                .collection(otherUser);
+
+        FirebaseFirestoreAdapter fb = new FirebaseFirestoreAdapter(collection);
+        chat = fb;
         initMessageUpdateListener();
 
         //TODO:# need to create some sort of message send button
@@ -59,17 +78,17 @@ public class MessagingActivity extends AppCompatActivity {
     }
 
     private void sendMessage() {
-        if (from == null || from.isEmpty()) {
-            Toast.makeText(this, "Enter your name", Toast.LENGTH_SHORT).show();
+        if (meUser == null || meUser.isEmpty()) {
+            Toast.makeText(this, "Do you even exist", Toast.LENGTH_SHORT).show();
             //return;
-            from = "Anything";
+            meUser = "Me";
         }
 
         //TODO: #change where the message gets displayed
         EditText messageView = findViewById(R.id.text_message);
 
         Map<String, String> newMessage = new HashMap<>();
-        newMessage.put("userIDinDB", from);//#changed name to userIDinDB
+        newMessage.put(FROM_KEY, meUser);//#changed name to userIDinDB
         newMessage.put(TIMESTAMP_KEY, String.valueOf(new Date().getTime()));
         newMessage.put(TEXT_KEY, messageView.getText().toString());
 
