@@ -272,8 +272,12 @@ public class ViewFriendsActivity extends AppCompatActivity {
                                     SharedPreferences.Editor editor = pref.edit();
 
                                     friendsArr.add(enteredEmail);
+                                    pendingFriendsArr.remove(enteredEmail);
                                     Set<String> tempFriendsSet = new HashSet<String>(friendsArr);
                                     editor.putStringSet("friendsArray", tempFriendsSet);
+
+                                    Set<String> tempPendingSet = new HashSet<String>(pendingFriendsArr);
+                                    editor.putStringSet("pendingFriendsArray", tempPendingSet);
                                     editor.apply();
 
                                     //add the friend to current user's friendList
