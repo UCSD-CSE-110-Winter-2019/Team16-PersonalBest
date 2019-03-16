@@ -1,11 +1,20 @@
 package edu.ucsd.cse110.mainpage;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -36,6 +45,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import android.content.Intent;
 
@@ -81,6 +91,8 @@ public class MainActivity extends AppCompatActivity {
     int onlyShowGoalAlertOnceCounter=0;
     String userEmail;
     SharedPreferences.Editor editPref;
+    String CHANNEL_ID = "Personal Best";
+    int motivation_notif_id = 0;
 
     public static final String NOTIFICATION_SERVICE_EXTRA = "NOTIFICATION_SERVICE";
     private static final String TAG = "MainActivity";//TODO: #consider changing to private static final String TAG = MainActivity.class.getSimpleName();
@@ -135,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
         userDocString = userSharedPref.getString("userIDinDB", "");
 
 
-        currGoalNum = userSharedPref.getLong("stepGoal", 0);
+        currGoalNum = userSharedPref.getLong("stepGoal", 500);
         currentGoal.setText(""+currGoalNum);
 
         height = userSharedPref.getInt("height",-1);
@@ -166,7 +178,6 @@ public class MainActivity extends AppCompatActivity {
 
         fitnessService = FitnessServiceFactory.create(fitnessServiceKey, this);
         fitnessService.setup();
-
 
 
 
@@ -210,6 +221,9 @@ public class MainActivity extends AppCompatActivity {
                     view.setBackgroundResource(R.drawable.end_button_bg_round);
                     homeMessage.setText(getString(R.string.title_walk));
                     walk_button.setText(getString(R.string.end_button));
+
+                    // Send motivational quote notification
+                    motivation_notif_id = sendMotivationNotification();
                 }
 
                 // Stop the walk
@@ -236,6 +250,9 @@ public class MainActivity extends AppCompatActivity {
                     view.setBackgroundResource(R.drawable.start_button_bg_round);
                     homeMessage.setText(getString(R.string.title_home));
                     walk_button.setText(getString(R.string.start_button));
+
+                    // Close the motivational notification
+                    clearNotification(motivation_notif_id);
                 }
 
             }
@@ -558,6 +575,89 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public int sendMotivationNotification() {
+        String[] quoteArray = getResources().getStringArray(R.array.motiv_quotes);
+        int randomIndex = new Random().nextInt(quoteArray.length);
+        String quote = quoteArray[randomIndex];
+
+        createNotificationChannel();
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.notification_icon)
+                .setContentText(quote)
+                .setStyle(new NotificationCompat.BigTextStyle()
+                        .bigText(quote))
+                .setContentTitle("Enjoy your walk!")
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setAutoCancel(true);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+
+        // notificationId is a unique int for each notification that you must define
+        notificationManager.notify(randomIndex, builder.build());
+        // return notificationId so that we can dismiss the notification when the walk ends
+        return randomIndex;
+    }
+
+
+    public void sendProgressNotification(long stepsTaken) {
+        createNotificationChannel();
+        int notificationId = (int) stepsTaken;
+
+        sendNotification(notificationId, "Awesome! You took " + stepsTaken + " steps toward your goal!",
+                "Tap to view your progress");
+
+    }
+
+    public void sendNotification(int notificationId, String title, String content) {
+        createNotificationChannel();
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.notification_icon)
+                .setContentText(content)
+                .setStyle(new NotificationCompat.BigTextStyle()
+                        .bigText(content))
+                .setContentTitle(title)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+
+        // notificationId is a unique int for each notification that you must define
+        notificationManager.notify(notificationId, builder.build());
+
+    }
+
+    public void clearNotification(int notificationId) {
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        try {
+            notificationManager.cancel(notificationId);
+        } catch (Exception e) { /* nothing to cancel (probably) */ }
+    }
+
+    /**
+     * Allows app to send notifications on Android 8.0
+     */
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = CHANNEL_ID;
+            String description = CHANNEL_ID;
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
+
     /**
      * Updates your personal best
      */
@@ -587,7 +687,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void updateGoal(){
-        if(stepsCount >= userSharedPref.getLong("stepGoal", 0)){
+        if(stepsCount >= userSharedPref.getLong("stepGoal", 500)){
             AlertDialog.Builder updateGoalDialog = new AlertDialog.Builder(this);
             updateGoalDialog.setMessage("Congrats on reaching your goal!!\nWould you like to update your\n" +
                     "goal to " + String.valueOf(currGoalNum+500) + "?")

@@ -243,6 +243,18 @@ public class ViewFriendsActivity extends AppCompatActivity {
                                                     Toast.makeText(ViewFriendsActivity.this, "You've sent " + friend + "\n" +
                                                             "a friend request!", Toast.LENGTH_LONG).show();
 
+                                                    SharedPreferences.Editor editor = pref.edit();
+
+                                                friendsArr.add(enteredEmail);
+                                                pendingFriendsArr.remove(enteredEmail);
+                                                Set<String> tempFriendsSet = new HashSet<String>(friendsArr);
+                                                editor.putStringSet("friendsArray", tempFriendsSet);
+
+                                                Set<String> tempPendingSet = new HashSet<String>(pendingFriendsArr);
+                                                editor.putStringSet("pendingFriendsArray", tempPendingSet);
+                                                editor.apply();
+
+
                                                 } else {
                                                     Toast.makeText(ViewFriendsActivity.this, "Error Sending Friend Request, \n" +
                                                                     "try again later!",
@@ -291,28 +303,7 @@ public class ViewFriendsActivity extends AppCompatActivity {
                             });
                     }
 
-                        // Remove yourself from their pending friends list and update their friends list
 
-                        // Add the friend
-
-                        //for (int i = 0; i < currPendingList.size(); i++) {
-                        //    if (currPendingList.get(i).equals(friend)) {
-                        //SharedPreferences.Editor editor = pref.edit();
-
-                        //friendsArr.add(enteredEmail);
-                       // Set<String> tempFriendsSet = new HashSet<String>(friendsArr);
-                        //editor.putStringSet("friendsArray", tempFriendsSet);
-                      //  editor.apply();
-
-                        //Add the friend to current user's friendList
-
-                        //Remove the current user from friend's pending list
-
-
-                        //Add the current user to friend's friend list
-                          //  }
-                        //}
-                    //}
                 } else{
                     Log.w(TAG, "Error getting documents.", task.getException());
                 }
