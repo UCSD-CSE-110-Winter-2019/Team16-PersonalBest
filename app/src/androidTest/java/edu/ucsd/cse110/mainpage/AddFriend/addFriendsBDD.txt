@@ -1,0 +1,20 @@
+Scenario 1: The user enters a email already in their list
+Given the user wants to add a new friend "ivivchar@ucsd.edu"
+And "ivivchar@ucsd.edu" is already in their friends list
+When the user enters the valid Google email address: "ivivchar@ucsd.edu"
+Then a message will popup indicating that you cannot add this email address again.
+
+Scenario 2: The user enters an invalid email
+Given the user wants to add a new friend
+When the user enters an invalid Google email address: "bobby@notgmail"
+Then a message will popup indicating an invalid email address.
+
+Scenario 3: The user enters their own email
+Given the user wants to add a new friend
+When the user enters their own Google email address
+Then a message will popup saying that they cannot add themselves
+
+Scenario 4: The user enters a valid email address
+Given the user wants to add a new friend
+When the user enters a valid Google email address
+Then a message will popup saying that they added a valid email.

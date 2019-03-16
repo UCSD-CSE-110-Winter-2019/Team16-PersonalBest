@@ -71,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
     int onlyShowGoalAlertOnceCounter=0;
     String userEmail;
     SharedPreferences.Editor editPref;
+    UpdateStepsAsyncTask atask;
 
 
     // Google Fit Set up
@@ -106,14 +107,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        currentGoal = (EditText)findViewById(R.id.currGoal);
+        currentGoal = (EditText) findViewById(R.id.currGoal);
         //currentGoal.setHint("Set Goal");
 
-            System.out.println("goal is......." + currGoalNum );
+        System.out.println("goal is......." + currGoalNum);
 
-        Button setGoalBtn = (Button)findViewById(R.id.goalBtn);
-        setGoalBtn.setOnClickListener(new View.OnClickListener(){
-            public void onClick (View v){
+        Button setGoalBtn = (Button) findViewById(R.id.goalBtn);
+        setGoalBtn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
                 setGoal();
             }
         });
@@ -126,9 +127,9 @@ public class MainActivity extends AppCompatActivity {
 
 
         currGoalNum = userSharedPref.getLong("stepGoal", 0);
-        currentGoal.setText(""+currGoalNum);
+        currentGoal.setText("" + currGoalNum);
 
-        height = userSharedPref.getInt("height",-1);
+        height = userSharedPref.getInt("height", -1);
         stepsCount = userSharedPref.getLong("steps", 0);
         walkStepsCount = userSharedPref.getLong("walkedSteps", 0);
 
@@ -138,9 +139,9 @@ public class MainActivity extends AppCompatActivity {
 
         // Keep track of all of the Text Views to change
         homeMessage = (TextView) findViewById(R.id.message);
-        speedTView = (TextView)findViewById(R.id.walkingSpeed);
+        speedTView = (TextView) findViewById(R.id.walkingSpeed);
         textSteps = findViewById(R.id.stepsView);
-        distance = (TextView)findViewById(R.id.distanceTView);
+        distance = (TextView) findViewById(R.id.distanceTView);
 
         if (height == -1) {
             Intent promptHeightIntent = new Intent(this, EnterHeightActivity.class);
@@ -158,13 +159,11 @@ public class MainActivity extends AppCompatActivity {
         fitnessService.setup();
 
 
-
-
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         // Create a button to go to charts
-        Button chartsPageBtn = (Button)findViewById(R.id.StepsChartBtn);
+        Button chartsPageBtn = (Button) findViewById(R.id.StepsChartBtn);
         chartsPageBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -173,9 +172,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Create a button to update personal best
-        Button personalBestBtn = (Button)findViewById(R.id.personalbestBtn);
-        personalBestBtn.setOnClickListener(new View.OnClickListener(){
-            public void onClick (View v){
+        Button personalBestBtn = (Button) findViewById(R.id.personalbestBtn);
+        personalBestBtn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
                 updatePersonalBest();
             }
         });
@@ -187,8 +186,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 // Start the walk
-                if(walk_button.getText()== getString(R.string.start_button))
-                {
+                if (walk_button.getText() == getString(R.string.start_button)) {
                     // Start keeping track of the walk
                     walkCurrentStepsCount = 0;
                     timer.startTimer();
@@ -203,11 +201,10 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 // Stop the walk
-                else
-                {
+                else {
                     // Find steps distance, speed, and time for the walk
                     fitnessService.updateStepCount();
-                    walkCurrentStepsCount =  stepper.getSteps(stepsCount);
+                    walkCurrentStepsCount = stepper.getSteps(stepsCount);
                     walkStepsCount = walkStepsCount + walkCurrentStepsCount;
                     fetchWalkedStepsArray();
                     walkDistance = DistanceCalculator.stepsToDistance(walkCurrentStepsCount, height);
@@ -232,7 +229,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        Button addfriendsBtn = (Button)findViewById(R.id.viewFriendsBtn);
+        Button addfriendsBtn = (Button) findViewById(R.id.viewFriendsBtn);
         addfriendsBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -247,14 +244,9 @@ public class MainActivity extends AppCompatActivity {
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
         startActivityForResult(signInIntent, 134);
 
-        UpdateStepsAsyncTask task = new UpdateStepsAsyncTask(fitnessService);
-        task.execute();
+        atask = new UpdateStepsAsyncTask(fitnessService);
+        atask.execute();
         fitnessService.updateStepCount();
-
-
-
-
-
     }
 
     @Override
@@ -614,5 +606,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void cancelStepAsyncTask() {
+        atask.cancel(true);
+    }
 }
 
