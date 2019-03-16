@@ -36,6 +36,7 @@ public class MessagingActivity extends AppCompatActivity {
     SharedPreferences userSharedPref;
 
     ChatMessageService chat;
+    ChatMessageService chat2;
     String meUser;
     String otherUser;
 
@@ -68,8 +69,15 @@ public class MessagingActivity extends AppCompatActivity {
                 .document(meUser)
                 .collection(otherUser);
 
+        CollectionReference collection2 = FirebaseFirestore.getInstance()
+                .collection(COLLECTION_KEY)
+                .document(otherUser)
+                .collection(meUser);
+
         FirebaseFirestoreAdapter fb = new FirebaseFirestoreAdapter(collection);
+        FirebaseFirestoreAdapter fb2 = new FirebaseFirestoreAdapter(collection2);
         chat = fb;
+        chat2 = fb2;
         initMessageUpdateListener();
 
         //TODO:# need to create some sort of message send button
@@ -93,6 +101,11 @@ public class MessagingActivity extends AppCompatActivity {
         newMessage.put(TEXT_KEY, messageView.getText().toString());
 
         chat.addMessage(newMessage).addOnSuccessListener(result -> {
+            messageView.setText("");
+        }).addOnFailureListener(error -> {
+            Log.e(TAG, error.getLocalizedMessage());
+        });
+        chat2.addMessage(newMessage).addOnSuccessListener(result -> {
             messageView.setText("");
         }).addOnFailureListener(error -> {
             Log.e(TAG, error.getLocalizedMessage());
