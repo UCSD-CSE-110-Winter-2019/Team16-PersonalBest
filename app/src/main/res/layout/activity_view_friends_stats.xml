@@ -3,11 +3,23 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".ViewFriendsStatsActivity">
+    android:orientation="vertical"
+    tools:context=".ViewFriendsStatsActivity"
+    android:weightSum="100">
 
     <com.github.mikephil.charting.charts.BarChart
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="400dp"
         android:id="@+id/friendsStatsLineChart"></com.github.mikephil.charting.charts.BarChart>
+
+    <Button
+        android:id="@+id/MessageBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="@dimen/content_padding"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/start_button_bg_round"
+        android:textColor="@color/lightText"
+        android:text="Message" />
 
 </LinearLayout>
