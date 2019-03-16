@@ -8,6 +8,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
@@ -61,8 +63,16 @@ public class ViewFriendsStatsActivity extends AppCompatActivity {
         if(bundle!=null)
         {
             userEmail = (String)bundle.getString("userEmail");
-
         }
+
+        Button messageBtn = findViewById(R.id.MessageBtn);
+
+        messageBtn.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                goMessage();
+            }
+        });
 
         lineChart = (BarChart)findViewById(R.id.friendsStatsLineChart);
         //lineData = new LineData(getXvalues(), getLineDataValues());
@@ -305,6 +315,12 @@ public class ViewFriendsStatsActivity extends AppCompatActivity {
 
 
         return xvalues;
+    }
+
+    private void goMessage() {
+        Intent messageIntent = new Intent(this, MessagingActivity.class);
+        messageIntent.putExtra("userEmail", userEmail);
+        startActivity(messageIntent);
     }
 }
 

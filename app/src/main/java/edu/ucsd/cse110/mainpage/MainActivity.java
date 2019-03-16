@@ -9,6 +9,9 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -45,6 +48,13 @@ import edu.ucsd.cse110.mainpage.classes.SpeedCalculator;
 import edu.ucsd.cse110.mainpage.classes.TimeCalculator;
 import edu.ucsd.cse110.mainpage.classes.StepCounter;
 
+import edu.ucsd.cse110.mainpage.chatmessage.ChatMessageService;
+import edu.ucsd.cse110.mainpage.chatmessage.ChatMessageServiceFactory;
+import edu.ucsd.cse110.mainpage.chatmessage.FirebaseFirestoreAdapter;
+import edu.ucsd.cse110.mainpage.notification.FirebaseCloudMessagingAdapter;
+import edu.ucsd.cse110.mainpage.notification.NotificationService;
+import edu.ucsd.cse110.mainpage.notification.NotificationServiceFactory;
+
 public class MainActivity extends AppCompatActivity {
     private TimeCalculator timer;
     private StepCounter stepper;
@@ -72,12 +82,11 @@ public class MainActivity extends AppCompatActivity {
     String userEmail;
     SharedPreferences.Editor editPref;
 
+    private static final String TAG = "MainActivity";//TODO: #consider changing to private static final String TAG = MainActivity.class.getSimpleName();
 
     // Google Fit Set up
     public static final String FITNESS_SERVICE_KEY = "FITNESS_SERVICE_KEY";
     private String fitnessServiceKey = "GOOGLE_FIT";
-
-    private static final String TAG = "MainActivity";
 
     private FitnessService fitnessService;
 
@@ -250,11 +259,6 @@ public class MainActivity extends AppCompatActivity {
         UpdateStepsAsyncTask task = new UpdateStepsAsyncTask(fitnessService);
         task.execute();
         fitnessService.updateStepCount();
-
-
-
-
-
     }
 
     @Override
@@ -613,6 +617,5 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }
-
 }
 

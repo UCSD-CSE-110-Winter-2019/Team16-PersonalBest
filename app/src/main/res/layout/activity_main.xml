@@ -119,12 +119,16 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="100dp"
+        android:id="@+id/goalLayout"
         android:orientation="horizontal">
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/goalBtn"
+            android:background="@drawable/start_button_bg_round"
+            android:textColor="@color/lightText"
             android:text="Set Goal"/>
 
         <EditText
@@ -134,18 +138,16 @@
             android:inputType = "number"
             android:text="0"
             />
+    </LinearLayout>
 
         <Button
             android:id="@+id/viewFriendsBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="100dp"
+            android:background="@drawable/start_button_bg_round"
+            android:textColor="@color/lightText"
             android:text="View Friends" />
-
-
-    </LinearLayout>
-
-
 
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/navigation"
