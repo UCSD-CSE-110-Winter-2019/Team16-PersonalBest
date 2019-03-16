@@ -16,4 +16,16 @@
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="confirmHeight">Confirm</string>
+
+    <string-array name="motiv_quotes">
+        <item>The difference between the impossible and the possible lies in a person’s determination.</item>
+        <item>We are what we repeatedly do. Excellence then is not an act but a habit.</item>
+        <item>If you want something you’ve never had, you must be willing to do something you’ve never done.</item>
+        <item>To give anything less than your best is to sacrifice the gift.</item>
+        <item>Life begins at the end of your comfort zone.</item>
+        <item>Strength does not come from physical capacity. It comes from an indomitable will.</item>
+        <item>Don’t count the days, make the days count.</item>
+        <item>When you feel like quitting, think about why you started.</item>
+    </string-array>
+
 </resources>
